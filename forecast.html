@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MarketLattice · Event-Aware Industry Forecast</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2358a6ff'/><stop offset='1' stop-color='%23b98fff'/></linearGradient></defs><rect width='32' height='32' rx='7' fill='url(%23g)'/><path d='M16 7L25 24L7 24Z' fill='%23fff'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>document.documentElement.setAttribute('data-theme',localStorage.getItem('sec-theme')||'dark');</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--bg2:#161c27;--bg3:#1e2736;--bg4:#263042;
+  --border:#2a3a50;--border2:#364d68;
+  --text:#e2edf8;--text2:#96b2cc;--text3:#607d96;
+  --accent:#58a6ff;--accent2:#2c6dd4;--accent-dim:rgba(88,166,255,.14);
+  --green:#3ecf72;--red:#f5504a;--amber:#e0a940;--purple:#b98fff;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --grid:rgba(88,166,255,.06);
+  --r:10px;
+}
+[data-theme="light"]{
+  --bg:#f4f6fb;--bg2:#ffffff;--bg3:#eaeff8;--bg4:#dde4f0;
+  --border:#d4dcea;--border2:#bec9db;
+  --text:#111927;--text2:#354d66;--text3:#6a84a0;
+  --accent:#2563eb;--accent2:#1d4ed8;--accent-dim:rgba(37,99,235,.1);
+  --green:#16a34a;--red:#dc2626;--amber:#b45309;--purple:#7c3aed;
+  --grid:rgba(37,99,235,.06);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;transition:background .2s,color .2s}
+body{display:flex;flex-direction:column;min-height:100vh}
+a{color:var(--accent);text-decoration:none}
+#hdr{height:54px;display:flex;align-items:center;gap:12px;padding:0 18px;background:var(--bg3);
+  border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:10}
+.hdr-icon{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--purple));
+  display:flex;align-items:center;justify-content:center;font-size:15px}
+.hdr-title{font-weight:800;letter-spacing:-.02em}
+.hdr-title span{color:var(--accent)}
+.hdr-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;cursor:pointer;transition:opacity .15s}
+.hdr-brand:hover{opacity:.72}
+.hdr-sub{color:var(--text3);font-size:12px;border-left:1px solid var(--border2);padding-left:12px}
+.hdr-spacer{flex:1}
+.hdr-link{font-size:13px;color:var(--text2);padding:6px 12px;border:1px solid var(--border2);border-radius:7px;background:transparent;cursor:pointer;font-family:var(--sans)}
+.hdr-link:hover{color:var(--text);border-color:var(--accent)}
+.hdr-btn{width:32px;height:32px;border-radius:7px;background:var(--bg4);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1;padding:0;
+  color:var(--text2);transition:border-color .15s,background .15s}
+.hdr-btn:hover{border-color:var(--accent);color:var(--text)}
+
+.hdr-menu{position:relative}
+.hdr-menu-list{position:absolute;top:calc(100% + 6px);right:0;min-width:190px;display:none;
+  flex-direction:column;align-items:stretch;gap:2px;background:var(--bg3);
+  border:1px solid var(--border2);border-radius:10px;padding:6px;z-index:60;
+  box-shadow:0 12px 34px rgba(0,0,0,.45)}
+.hdr-menu-list.open{display:flex}
+.hdr-menu-list button{background:transparent;border:0;color:var(--text2);text-align:left;
+  font-family:var(--sans);font-size:13px;font-weight:600;padding:9px 11px;border-radius:7px;cursor:pointer}
+.hdr-menu-list button:hover{background:var(--accent-dim);color:var(--text)}
+main{flex:1;max-width:1420px;width:100%;margin:0 auto;padding:24px 18px 48px}
+
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:1000px){.layout{grid-template-columns:minmax(0,1fr)}}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;background:var(--bg2);
+  border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-weight:600}
+.trend-checks{display:flex;gap:12px;align-items:center;height:38px}
+.trend-checks .chk{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--text2);
+  text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;user-select:none}
+.trend-checks input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;padding:0}
+input,select{background:var(--bg);border:1px solid var(--border2);color:var(--text);border-radius:7px;
+  padding:9px 11px;font-family:var(--sans);font-size:14px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+#company{min-width:340px}
+#history{width:110px}
+.seg{display:flex;background:var(--bg);border:1px solid var(--border2);border-radius:7px;padding:3px;gap:3px}
+.seg button{background:transparent;color:var(--text2);border:none;border-radius:5px;padding:7px 14px;
+  font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.seg button:hover{background:var(--bg3);color:var(--text)}
+.seg button.on{background:var(--accent);color:#fff}
+.field.dim{opacity:.45}
+.field.dim select{pointer-events:none}
+
+.adv{flex-basis:100%}
+.adv summary{display:inline-flex;align-items:center;gap:6px;list-style:none;cursor:pointer;
+  user-select:none;font-size:12px;font-weight:700;color:var(--text2);
+  border:1px solid var(--border2);border-radius:7px;padding:8px 11px}
+.adv summary::-webkit-details-marker{display:none}
+.adv summary::before{content:'▸';font-size:10px;transition:transform .15s}
+.adv[open] summary::before{transform:rotate(90deg)}
+.adv summary:hover{color:var(--text);border-color:var(--accent)}
+.adv-body{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-top:14px;
+  padding-top:14px;border-top:1px solid var(--border)}
+button{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:10px 20px;font-weight:600;
+  font-size:14px;cursor:pointer;font-family:var(--sans)}
+button:hover{background:var(--accent2)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:18px}
+
+#suscPanel{position:sticky;top:76px;padding:14px}
+#suscPanel h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-weight:700;margin-bottom:3px}
+#suscSub{font-size:11.5px;color:var(--text3);line-height:1.45;margin-bottom:11px}
+#suscSub b{color:var(--text2)}
+#suscMsg{font-size:12px;color:var(--text3);line-height:1.5;padding:6px 0}
+#suscMsg.err{color:#f85149}
+#suscList{list-style:none;max-height:62vh;overflow-y:auto;margin:0 -6px;padding:0 6px}
+.susc-row{display:block;width:100%;text-align:left;background:none;border:none;color:inherit;font-family:var(--sans);
+  padding:7px 8px;border-radius:7px;cursor:pointer;font-weight:400}
+.susc-row:hover{background:var(--bg4)}
+.susc-row.on{background:var(--accent-dim);box-shadow:inset 2px 0 0 var(--accent)}
+.susc-top{display:flex;align-items:baseline;gap:8px}
+.susc-rank{font-size:10.5px;color:var(--text3);font-variant-numeric:tabular-nums;min-width:16px}
+.susc-name{font-size:13px;font-weight:600;color:var(--text)}
+.susc-pct{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:var(--accent);font-weight:700}
+
+.susc-bar{display:block;height:4px;border-radius:2px;background:var(--bg4);margin:5px 0 4px 24px;overflow:hidden}
+.susc-bar>i{display:block;height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+.susc-meta{display:block;font-size:10.5px;color:var(--text3);margin-left:24px;font-variant-numeric:tabular-nums}
+.stats{display:flex;flex-wrap:wrap;gap:22px;margin-bottom:6px}
+.stat{display:flex;flex-direction:column}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-weight:600}
+.stat .v{font-size:20px;font-weight:700;font-family:var(--mono)}
+.stat[data-info] .k{cursor:help;border-bottom:1px dotted var(--text3);width:max-content;max-width:100%}
+.stat[data-info]:hover .k{color:var(--text2);border-bottom-color:var(--text2)}
+#metricTip{position:fixed;z-index:70;max-width:380px;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:10px;padding:13px 15px;font-size:12.5px;line-height:1.55;color:var(--text2);
+  box-shadow:0 14px 38px rgba(0,0,0,.55);display:none;pointer-events:none}
+#metricTip h4{margin:0 0 6px;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+#metricTip b{color:var(--text)}
+#metricTip .ex{display:block;margin-top:9px;padding:8px 11px;background:var(--accent-dim);
+  border-left:2px solid var(--accent);border-radius:0 6px 6px 0;color:var(--text2)}
+#metricTip .ex b{color:var(--text)}
+.v.up{color:var(--green)} .v.down{color:var(--red)}
+#chartWrap{position:relative;height:440px}
+#msg{color:var(--text2);padding:14px 4px}
+#msg.err{color:var(--red)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--text2)}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+.legend .band{height:11px;border-radius:3px}
+.foot{color:var(--text3);font-size:12px;margin-top:10px}
+.combo{position:relative;min-width:340px}
+.combo>input{width:100%;padding-right:30px}
+.combo-caret{position:absolute;right:11px;top:35px;color:var(--text3);cursor:pointer;font-size:11px}
+.combo.loading>input{opacity:.75}
+.combo.loading .combo-caret{width:13px;height:13px;top:33px;padding:0;font-size:0;box-sizing:border-box;
+  border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;
+  animation:ml-spin .7s linear infinite;cursor:default}
+.combo-menu{position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:300px;overflow-y:auto;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:8px;z-index:30;display:none;
+  box-shadow:0 12px 34px rgba(0,0,0,.5)}
+.combo-menu.open{display:block}
+.combo-opt{padding:9px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+  gap:14px;font-size:13px;border-bottom:1px solid rgba(42,58,80,.45)}
+.combo-opt:last-child{border-bottom:none}
+.combo-opt:hover,.combo-opt.active{background:var(--accent-dim)}
+.combo-opt .nm{color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.combo-opt .ck{color:var(--text3);font-family:var(--mono);font-size:12px;flex-shrink:0}
+.combo-opt mark{background:transparent;color:var(--accent);font-weight:700;padding:0}
+.combo-empty{padding:11px 12px;color:var(--text3);font-size:13px}
+.loader{display:inline-flex;align-items:center;gap:11px;font-size:15px;color:var(--text2)}
+.loader .spin{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);
+  border-radius:50%;animation:ml-spin .7s linear infinite;flex-shrink:0}
+.loader-word{font-weight:700;color:var(--text);animation:ml-fade .5s ease}
+.loader-dots::after{content:'';animation:ml-dots 1.4s steps(4,end) infinite}
+@keyframes ml-spin{to{transform:rotate(360deg)}}
+@keyframes ml-fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes ml-dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%,100%{content:'...'}}
+
+#print-head{display:none;align-items:center;gap:10px;border-bottom:1px solid var(--border2);
+  padding-bottom:10px;margin-bottom:16px}
+#print-head .pt-logo{width:26px;height:26px;border-radius:6px;
+  background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;
+  justify-content:center;color:#fff;font-size:13px}
+#print-head .pt-title{font-weight:800;font-size:15px}
+#print-head .pt-meta{margin-left:auto;font-size:11px;color:var(--text3)}
+@media print{
+  :root,[data-theme="light"]{--bg:#fff;--bg2:#fff;--bg3:#fff;--bg4:#fff;
+    --border:#cbd5e1;--border2:#cbd5e1;--text:#0b1220;--text2:#334155;--text3:#475569;
+    --grid:transparent;--accent:#2563eb;--purple:#7c3aed}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;box-shadow:none !important}
+  html,body{background:#fff !important;height:auto !important}
+  #hdr,.controls,#msg,.combo-menu,#help-overlay,#info-overlay,#suscPanel{display:none !important}
+  main{max-width:100% !important;padding:0 !important}
+  .layout{display:block !important}
+  #print-head{display:flex !important}
+  .card{break-inside:avoid;border:1px solid #cbd5e1 !important;background:#fff !important;margin-bottom:14px}
+  @page{margin:14mm}
+}
+
+#help-overlay,#info-overlay{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;
+  padding:24px;background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+#help-overlay.on,#info-overlay.on{display:flex}
+#help-modal,#info-modal{width:100%;max-width:640px;max-height:86vh;display:flex;flex-direction:column;background:var(--bg2);
+  border:1px solid var(--border2);border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden}
+#info-modal{max-width:780px;max-height:90vh}
+#help-modal.max,#info-modal.max{max-width:96vw;max-height:94vh;height:94vh}
+#help-hd,#info-hd{display:flex;align-items:center;gap:11px;padding:15px 20px;border-bottom:1px solid var(--border2);background:var(--bg3)}
+#help-hd .ic,#info-hd .ic{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--purple));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
+#help-hd h2,#info-hd h2{font-size:16px;font-weight:800}
+#help-hd .mx,#info-hd .mx{margin-left:auto;cursor:pointer;color:var(--text3);font-size:16px;background:none;border:none;line-height:1;padding:0 2px}
+#help-hd .mx:hover,#info-hd .mx:hover{color:var(--text)}
+#help-hd .x,#info-hd .x{margin-left:10px;cursor:pointer;color:var(--text3);font-size:20px;background:none;border:none;line-height:1;padding:0}
+#help-hd .x:hover,#info-hd .x:hover{color:var(--text)}
+#help-body,#info-body{padding:18px 20px;overflow-y:auto}
+#help-body h3,#info-body h3{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);margin:16px 0 6px}
+#help-body h3:first-child,#info-body h3:first-child{margin-top:0}
+#help-body p,#info-body p{color:var(--text2);font-size:13.5px;margin-bottom:8px}
+#help-body ul,#info-body ul{margin:0 0 10px 18px;color:var(--text2);font-size:13.5px}
+#help-body li,#info-body li{margin-bottom:5px}
+#help-body b,#info-body b{color:var(--text)}
+#info-body table{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0 12px}
+#info-body th,#info-body td{border:1px solid var(--border2);padding:6px 9px;text-align:left;color:var(--text2);vertical-align:top}
+#info-body th{background:var(--bg3);color:var(--text);font-weight:700;white-space:nowrap}
+#info-body td:first-child{white-space:nowrap;color:var(--text)}
+.figwrap{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px;margin:6px 0 12px}
+.figwrap svg{width:100%;height:auto;display:block}
+.figcap{font-size:11px;color:var(--text3);margin-top:7px;text-align:center}
+</style>
+<script src="/config.js"></script>
+
+<style>html{visibility:hidden}</style>
+<script>(function(){fetch('/api/status').then(function(r){if(!r.ok)throw 0;document.documentElement.style.visibility='visible';}).catch(function(){location.replace('/login.html');});})();</script>
+
+<style>
+
+#input-sec { padding-bottom: 46px; }
+</style>
+</head>
+<body>
+<header id="hdr">
+  <a class="hdr-brand" href="/" title="Back to MarketLattice home" aria-label="MarketLattice — home">
+    <div class="hdr-icon">📈</div>
+    <div class="hdr-title">Market<span>Lattice</span></div>
+  </a>
+  <div class="hdr-sub">Event-Aware Industry Forecast</div>
+  <div class="hdr-spacer"></div>
+  <div class="hdr-menu">
+    <button class="hdr-link" id="help-menu-btn" aria-haspopup="true" aria-expanded="false"
+            aria-controls="help-menu-list" title="Help and methodology">Help ▾</button>
+    <div class="hdr-menu-list" id="help-menu-list" role="menu" aria-label="Help">
+      <button type="button" role="menuitem" onclick="openHelp()" title="How to use the forecaster">How to use</button>
+      <button type="button" role="menuitem" onclick="openInfo()" title="How the forecasting model works">How do we Forecast</button>
+    </div>
+  </div>
+  <button class="hdr-link" onclick="exportPDF()" title="Export the current forecast as PDF">Export PDF</button>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#262624;--bg2:#1f1e1d;--bg3:#30302e;--bg4:#3a3a37;--bg5:#454542;
+  --border:#33322f;--border2:#3d3d3a;--border3:#54534e;
+  --text:#faf9f5;--text2:#c2bfb6;--text3:#8a8781;
+  --accent:#d97757;--accent2:#c2603f;--accent-dim:rgba(217,119,87,.15);--accent-glow:rgba(217,119,87,.25);
+  --green:#7fb069;--green-dim:rgba(127,176,105,.15);
+  --amber:#d8a657;--amber-dim:rgba(216,166,87,.15);--red:#e07a5f;--red-dim:rgba(224,122,95,.15);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,.15);--teal:#6fb3a8;--teal-dim:rgba(111,179,168,.15);
+  --umsg-bg:#30302e;--umsg-text:#faf9f5;
+  --cy-bg:#1c1b1a;
+  --c-kw:#e07a5f;--c-fn:#a78bfa;--c-lb:#81a2be;--c-st:#9dbf9d;--c-nm:#d8a657;--c-cm:#79766f;
+  --grid:transparent;
+  --serif:'Source Serif 4','Tiempos Text',Georgia,'Times New Roman',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --r:8px;--rl:12px;--sbw:272px;--hh:0px;
+}
+[data-theme="light"]{
+  --bg:#faf9f5;--bg2:#f0eee6;--bg3:#ffffff;--bg4:#eae8df;--bg5:#dedbd0;
+  --border:#e5e2d9;--border2:#dcd9cf;--border3:#c2beb2;
+  --text:#1f1e1d;--text2:#4a4843;--text3:#7d7a72;
+  --accent:#c2603f;--accent2:#a84f31;--accent-dim:rgba(194,96,63,.1);--accent-glow:rgba(194,96,63,.2);
+  --green:#4f7942;--green-dim:rgba(79,121,66,.1);
+  --amber:#a1701d;--amber-dim:rgba(161,112,29,.12);--red:#b3462b;--red-dim:rgba(179,70,43,.1);
+  --purple:#6d4aff;--purple-dim:rgba(109,74,255,.1);--teal:#2f7a6e;--teal-dim:rgba(47,122,110,.1);
+  --umsg-bg:#f0eee6;--umsg-text:#1f1e1d;
+  --cy-bg:#f4f2ea;
+  --c-kw:#b3462b;--c-fn:#6d4aff;--c-lb:#1a5fb4;--c-st:#2f7a6e;--c-nm:#a1701d;--c-cm:#7d7a72;
+  --grid:transparent;
+}
+
+body{padding-left:var(--sbw);transition:padding-left .2s ease}
+body.ms-collapsed{padding-left:0}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--border3);border-radius:4px;border:2px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:var(--text3);background-clip:content-box}
+
+#mlside{
+  position:fixed;top:0;left:0;bottom:0;width:var(--sbw);z-index:200;
+  display:flex;flex-direction:column;background:var(--bg2);
+  border-right:1px solid var(--border);font-family:var(--sans);
+  transition:transform .2s ease;
+}
+body.ms-collapsed #mlside{transform:translateX(-100%)}
+.ms-top{display:flex;align-items:center;padding:18px 16px 10px}
+.ms-brand{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:-.015em;
+  color:var(--text);text-decoration:none;line-height:1;transition:opacity .15s}
+.ms-brand:hover{opacity:.75}
+.ms-nav{display:flex;flex-direction:column;gap:1px;padding:6px 8px 4px}
+.ms-item{display:flex;align-items:center;gap:11px;height:34px;padding:0 10px;border-radius:8px;
+  font-family:var(--sans);font-size:14px;font-weight:400;line-height:1;letter-spacing:0;
+  color:var(--text2);background:transparent;border:0;text-decoration:none;cursor:pointer;
+  width:100%;text-align:left;transition:background .12s ease,color .12s ease}
+.ms-item:hover{background:var(--bg3);color:var(--text)}
+.ms-item.active{background:var(--bg3);color:var(--text)}
+.ms-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;opacity:.9}
+.ms-item .lbl{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-item .tag{font-size:12px;color:var(--accent);font-weight:400}
+
+.ms-sec{display:flex;align-items:center;padding:16px 18px 6px;font-size:12.5px;
+  color:var(--text3);font-weight:400;letter-spacing:0}
+.ms-sec .sp{flex:1}
+.ms-scroll{flex:1;overflow-y:auto;padding:0 8px 8px;min-height:0}
+.ms-empty{padding:6px 12px;font-size:12.5px;color:var(--text3)}
+
+.ms-chat{display:flex;align-items:center;gap:10px;height:32px;padding:0 8px 0 10px;
+  border-radius:8px;cursor:pointer;color:var(--text2);font-size:13.5px;
+  transition:background .12s ease,color .12s ease}
+.ms-chat:hover{background:var(--bg3);color:var(--text)}
+.ms-chat.act{background:var(--bg3);color:var(--text)}
+.ms-chat .dot{width:6px;height:6px;border-radius:50%;border:1px solid var(--text3);flex-shrink:0}
+.ms-chat.act .dot{border-color:var(--accent);background:var(--accent)}
+.ms-chat .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-chat .x{flex:none;width:20px;height:20px;border:0;background:none;color:var(--text3);
+  font-size:12px;line-height:1;border-radius:5px;cursor:pointer;opacity:0;transition:all .12s}
+.ms-chat:hover .x{opacity:.7}
+.ms-chat .x:hover{opacity:1;color:var(--red);background:var(--red-dim)}
+
+.ms-foot{border-top:1px solid var(--border);padding:6px 8px 8px}
+.ms-acct{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;
+  cursor:pointer;transition:background .12s ease}
+.ms-acct:hover{background:var(--bg3)}
+.ms-av{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;background:var(--bg5);color:var(--text);font-size:10.5px;
+  font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+.ms-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:13.5px;color:var(--text)}
+.ms-chev{color:var(--text3);flex-shrink:0;display:flex;align-items:center}
+.ms-tools{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.ms-tool{width:26px;height:26px;border:0;background:none;border-radius:6px;color:var(--text3);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s}
+.ms-tool:hover{background:var(--bg4);color:var(--text)}
+
+.ms-tool svg{width:15px;height:15px;flex:0 0 auto;stroke:currentColor;fill:none;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.ms-menu{position:absolute;left:8px;right:8px;bottom:54px;display:none;flex-direction:column;
+  gap:1px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:5px;
+  box-shadow:0 12px 34px rgba(0,0,0,.4);z-index:210}
+.ms-menu.open{display:flex}
+.ms-menu .ms-item{height:32px;font-size:13.5px}
+
+#ms-show{position:fixed;top:12px;left:12px;z-index:201;display:none;width:30px;height:30px;
+  align-items:center;justify-content:center;border-radius:8px;border:0;cursor:pointer;
+  background:var(--bg3);color:var(--text2)}
+body.ms-collapsed #ms-show{display:flex}
+#ms-show:hover{color:var(--text)}
+#ms-show svg{width:16px;height:16px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:1.6}
+
+#hdr{background:var(--bg);border:0;box-shadow:none;min-height:52px;height:auto;
+  padding:0 20px;gap:10px}
+#hdr .hdr-brand,#hdr .hdr-icon,#hdr .hdr-sep{display:none}
+#hdr .hdr-title{display:none}
+#hdr .hdr-sub{font-family:var(--sans);font-size:14px;font-weight:400;color:var(--text);
+  text-transform:none;letter-spacing:0;border:0;padding:0;margin:0}
+
+body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
+
+@media(max-width:820px){
+  body{padding-left:0}
+  #mlside{transform:translateX(-100%);box-shadow:0 0 40px rgba(0,0,0,.45)}
+  body.ms-open #mlside{transform:none}
+  #ms-show{display:flex}
+  
+  body.ms-open #ms-show{display:none}
+  #ms-scrim{position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.45);display:none}
+  body.ms-open #ms-scrim{display:block}
+  #topbar,#hdr{padding-left:52px}
+}
+</style>
+
+<div id="ms-scrim" hidden-role="backdrop"></div>
+<button type="button" id="ms-show" title="Open sidebar" aria-label="Open sidebar">
+  <svg width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+</button>
+
+<aside id="mlside">
+  <div class="ms-top"><a class="ms-brand" href="/">MarketLattice</a></div>
+
+  <nav class="ms-nav">
+    <a class="ms-item" id="nav-new" href="/" title="Start a new conversation">
+      <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+      <span class="lbl">New</span></a>
+    <a class="ms-item" id="nav-chat" href="/" data-path="/" title="Chat">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="lbl">Chat</span></a>
+    <a class="ms-item" id="nav-forecast" href="/forecast" data-path="/forecast"
+       title="Event-aware stock price forecasts">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-5 3 3 5-7"/></svg>
+      <span class="lbl">Forecast</span></a>
+    <a class="ms-item" id="nav-planner" href="/planner" data-path="/planner" 
+       title="Turn an amount and a horizon into a modelled allocation">
+      <svg width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+      <span class="lbl">Planner</span></a>
+    <a class="ms-item" id="nav-events" href="/events" data-path="/events"
+       title="8-K filing calendar and per-company event impact">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+      <span class="lbl">Event Analysis</span></a>
+    <a class="ms-item" id="nav-trades" href="/trades" data-path="/trades"
+       title="Publicly disclosed insider trades">
+      <svg width="16" height="16" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <span class="lbl">Trades</span></a>
+    <a class="ms-item" id="nav-bench" href="/benchmark" data-path="/benchmark" 
+       title="LLM benchmark — model leaderboard and per-test-case analysis">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M9 3h6M10 3v5L5 19a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-11V3"/></svg>
+      <span class="lbl">Benchmark</span></a>
+    <a class="ms-item" id="nav-accuracy" href="/accuracy" data-path="/accuracy"
+       title="Measured end-to-end accuracy of the planner pipeline">
+      <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
+      <span class="lbl">Accuracy</span></a>
+  </nav>
+
+  <div class="ms-sec"><span id="ms-sec-lbl">Chats and tasks</span><span class="sp"></span>
+    <button class="ms-tool" id="ms-clear" title="Clear all conversations" aria-label="Clear all conversations"
+            style="display:none">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+    </button>
+  </div>
+  <div class="ms-scroll" id="mlside-chats">
+    <div class="ms-empty" id="ms-chats-empty">No conversations yet</div>
+  </div>
+
+  <div class="ms-foot">
+    <div class="ms-menu" id="ms-menu" role="menu">
+      <button class="ms-item" type="button" onclick="toggleTheme()" role="menuitem">
+        <svg width="16" height="16" viewBox="0 0 24 24" id="ms-theme-ic"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>
+        <span class="lbl" id="ms-theme-lbl">Appearance</span></button>
+      <button class="ms-item" type="button" id="ms-feedback-btn" role="menuitem">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v4M12 14h.01"/></svg>
+        <span class="lbl">Send feedback</span></button>
+      <a class="ms-item" id="nav-logout" href="/logout" role="menuitem">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        <span class="lbl">Sign out</span></a>
+    </div>
+    <div class="ms-acct" id="ms-acct" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">
+      <span class="ms-av" id="ms-av">··</span>
+      <span class="ms-name" id="ms-name">Signed in</span>
+      <span class="ms-chev"><svg class="cv" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>
+      <span class="ms-tools">
+        <button class="ms-tool" id="ms-hide" title="Collapse sidebar" aria-label="Collapse sidebar">
+          <svg width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+        </button>
+      </span>
+    </div>
+  </div>
+</aside>
+
+<script>(function(){var side=document.getElementById('mlside');document.querySelectorAll('.ms-nav a[data-path]').forEach(function(a){if(a.dataset.path===location.pathname)a.classList.add('active');});fetch('/api/status').then(function(r){return r.json();}).then(function(d){if(!d||!d.user)return;document.getElementById('ms-name').textContent=d.user;var parts=String(d.user).replace(/[._-]+/g,' ').trim().split(/\s+/);var ini=parts.length>1?parts[0][0]+parts[parts.length-1][0]:parts[0].slice(0,2);document.getElementById('ms-av').textContent=ini;}).catch(function(){});var menu=document.getElementById('ms-menu');var acct=document.getElementById('ms-acct');function setOpen(open){menu.classList.toggle('open',open);acct.setAttribute('aria-expanded',open?'true':'false');}
+acct.addEventListener('click',function(e){if(e.target.closest('#ms-hide'))return;e.stopPropagation();setOpen(!menu.classList.contains('open'));});acct.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();setOpen(!menu.classList.contains('open'));}});document.addEventListener('click',function(e){if(!menu.contains(e.target))setOpen(false);});document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});var narrow=function(){return window.matchMedia('(max-width:820px)').matches;};function hide(){if(narrow())document.body.classList.remove('ms-open');else{document.body.classList.add('ms-collapsed');localStorage.setItem('ml-side','closed');}}
+function show(){if(narrow())document.body.classList.add('ms-open');else{document.body.classList.remove('ms-collapsed');localStorage.setItem('ml-side','open');}}
+document.getElementById('ms-hide').addEventListener('click',function(e){e.stopPropagation();hide();});document.getElementById('ms-show').addEventListener('click',function(e){e.stopPropagation();show();});document.getElementById('ms-scrim').addEventListener('click',hide);if(localStorage.getItem('ml-side')==='closed')document.body.classList.add('ms-collapsed');if(typeof window.toggleTheme!=='function'){window.toggleTheme=function(){var cur=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';var next=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',next);localStorage.setItem('sec-theme',next);var l=document.getElementById('ms-theme-lbl');if(l)l.textContent=next==='dark'?'Light mode':'Dark mode';};}
+var t=localStorage.getItem('sec-theme')||'dark';document.documentElement.setAttribute('data-theme',t);document.getElementById('ms-theme-lbl').textContent=t==='dark'?'Light mode':'Dark mode';new MutationObserver(function(){var cur=document.documentElement.getAttribute('data-theme');var l=document.getElementById('ms-theme-lbl');if(l)l.textContent=cur==='dark'?'Light mode':'Dark mode';}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});})();</script>
+
+<style>
+#fbk-overlay{position:fixed;inset:0;z-index:9995;display:none;align-items:center;
+  justify-content:center;padding:24px;background:rgba(0,0,0,.5)}
+#fbk-overlay.open{display:flex}
+#fbk{width:100%;max-width:440px;background:var(--bg3,#30302e);color:var(--text,#faf9f5);
+  border:1px solid var(--border2,#3d3d3a);border-radius:16px;padding:20px;
+  font-family:var(--sans,system-ui);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+#fbk h2{font-family:var(--serif,Georgia,serif);font-size:20px;font-weight:400;
+  letter-spacing:-.01em;margin-bottom:4px}
+#fbk .sub{font-size:13px;color:var(--text3,#8a8781);margin-bottom:14px}
+#fbk .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+#fbk .chip{font-size:13px;color:var(--text2,#c2bfb6);background:transparent;
+  border:1px solid var(--border2,#3d3d3a);border-radius:16px;padding:6px 13px;cursor:pointer;
+  transition:all .12s}
+#fbk .chip:hover{color:var(--text,#faf9f5);border-color:var(--border3,#54534e)}
+#fbk .chip.on{color:var(--accent,#d97757);border-color:var(--accent,#d97757);
+  background:var(--accent-dim,rgba(217,119,87,.15))}
+#fbk textarea{width:100%;min-height:96px;max-height:220px;resize:vertical;
+  background:var(--bg,#262624);color:var(--text,#faf9f5);
+  border:1px solid var(--border2,#3d3d3a);border-radius:10px;padding:10px 12px;
+  font-family:inherit;font-size:14px;line-height:1.55;outline:none}
+#fbk textarea:focus{border-color:var(--border3,#54534e)}
+#fbk .foot{display:flex;align-items:center;gap:10px;margin-top:12px}
+#fbk .msg{flex:1;font-size:12.5px;color:var(--text3,#8a8781)}
+#fbk .msg.ok{color:var(--green,#7fb069)}
+#fbk .msg.err{color:var(--red,#e07a5f)}
+#fbk button.act{font-size:13.5px;border-radius:9px;padding:8px 15px;cursor:pointer;
+  border:1px solid transparent;background:transparent;color:var(--text2,#c2bfb6)}
+#fbk button.act:hover{background:var(--bg4,#3a3a37);color:var(--text,#faf9f5)}
+#fbk button.act.primary{background:var(--accent,#d97757);color:#fff}
+#fbk button.act.primary:hover{background:var(--accent2,#c2603f)}
+#fbk button.act:disabled{opacity:.5;cursor:default}
+</style>
+<div id="fbk-overlay" role="dialog" aria-modal="true" aria-labelledby="fbk-title">
+  <div id="fbk">
+    <h2 id="fbk-title">Send feedback</h2>
+    <div class="sub" id="fbk-page">About this page</div>
+    <div class="chips" id="fbk-chips">
+      <button type="button" class="chip" data-tag="works well">Works well</button>
+      <button type="button" class="chip" data-tag="something is wrong">Something's wrong</button>
+      <button type="button" class="chip" data-tag="confusing">Confusing</button>
+      <button type="button" class="chip" data-tag="too slow">Too slow</button>
+      <button type="button" class="chip" data-tag="suggestion">Suggestion</button>
+    </div>
+    <textarea id="fbk-text" placeholder="What happened, or what would make this better?"></textarea>
+    <div class="foot">
+      <span class="msg" id="fbk-msg"></span>
+      <button type="button" class="act" id="fbk-cancel">Cancel</button>
+      <button type="button" class="act primary" id="fbk-send">Send</button>
+    </div>
+  </div>
+</div>
+<script>(function(){var overlay=document.getElementById('fbk-overlay');var text=document.getElementById('fbk-text');var msg=document.getElementById('fbk-msg');var send=document.getElementById('fbk-send');var tags=[];function ctx(){var c=(typeof window.ML_PAGE_CONTEXT==='function')?window.ML_PAGE_CONTEXT():window.ML_PAGE_CONTEXT;if(c&&c.page)return c;return{page:document.title||location.pathname,summary:''};}
+function open(){var c=ctx();document.getElementById('fbk-page').textContent='About: '+c.page;msg.textContent='';msg.className='msg';send.disabled=false;overlay.classList.add('open');setTimeout(function(){text.focus();},50);}
+function close(){overlay.classList.remove('open');}
+document.getElementById('ms-feedback-btn').addEventListener('click',function(e){e.stopPropagation();var menu=document.getElementById('ms-menu');if(menu)menu.classList.remove('open');open();});document.getElementById('fbk-cancel').addEventListener('click',close);overlay.addEventListener('click',function(e){if(e.target===overlay)close();});document.addEventListener('keydown',function(e){if(e.key==='Escape'&&overlay.classList.contains('open'))close();});document.getElementById('fbk-chips').addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;b.classList.toggle('on');tags=Array.prototype.map.call(document.querySelectorAll('#fbk-chips .chip.on'),function(c){return c.dataset.tag;});});send.addEventListener('click',async function(){var body=(text.value||'').trim();if(!body&&!tags.length){msg.className='msg err';msg.textContent='Pick a tag or write something first.';return;}
+send.disabled=true;msg.className='msg';msg.textContent='Sending…';var c=ctx();try{var r=await fetch('/api/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({feedback:(tags.length?'['+tags.join(', ')+'] ':'')+body,page:c.page+' ('+location.pathname+')',context:typeof c.summary==='string'?c.summary:JSON.stringify(c.summary||''),model:localStorage['sec-model']||''})});if(r.status===401){location.href='/login';return;}
+var d=await r.json().catch(function(){return{};});if(!r.ok)throw new Error(d.error||('HTTP '+r.status));msg.className='msg ok';msg.textContent='Thanks — sent.';text.value='';document.querySelectorAll('#fbk-chips .chip.on').forEach(function(c2){c2.classList.remove('on');});tags=[];setTimeout(close,900);}catch(err){msg.className='msg err';msg.textContent='Could not send: '+err.message;send.disabled=false;}});})();</script>
+
+<style>
+.mlchat-fab{position:fixed;right:22px;bottom:22px;width:54px;height:54px;border-radius:50%;
+  background:var(--accent,#d97757);color:#fff;border:0;cursor:pointer;z-index:9990;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.35);
+  transition:filter .15s ease}
+.mlchat-fab:hover{filter:brightness(1.12)}
+.mlchat-panel{position:fixed;right:22px;bottom:88px;width:380px;height:520px;
+  max-width:calc(100vw - 24px);max-height:calc(100vh - 120px);
+  background:var(--bg2,#1c1f26);border:1px solid var(--border2,#333);border-radius:12px;
+  z-index:9991;display:none;flex-direction:column;overflow:hidden;
+  box-shadow:0 8px 30px rgba(0,0,0,.45);font-family:var(--sans,system-ui)}
+.mlchat-panel.open{display:flex}
+.mlchat-head{display:flex;align-items:center;gap:7px;padding:10px 12px;
+  border-bottom:1px solid var(--border2,#333);font-size:13px;font-weight:700;color:var(--text,#eee)}
+.mlchat-head .pg{color:var(--text2,#aaa);font-weight:400;font-size:11px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.mlchat-head button{margin-left:auto;background:none;border:0;color:var(--text2,#aaa);
+  cursor:pointer;font-size:15px;padding:2px 6px}
+.mlchat-head button:hover{color:var(--text,#eee)}
+.mlchat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.mlchat-m{max-width:85%;padding:8px 11px;border-radius:10px;font-size:13.5px;line-height:1.55;
+  white-space:pre-wrap;word-wrap:break-word}
+.mlchat-m.user{align-self:flex-end;background:var(--bg4,#3a3a37);color:var(--text,#faf9f5);
+  border-bottom-right-radius:3px}
+.mlchat-m.bot{align-self:flex-start;background:var(--bg,#111);color:var(--text,#eee);
+  border:1px solid var(--border2,#333);border-bottom-left-radius:3px;
+  border-left:3px solid var(--accent,#4f7cff)}
+
+.mlchat-m .ml-pos{color:var(--green,#3ecf72);font-weight:600}
+.mlchat-m .ml-neg{color:var(--red,#f5504a);font-weight:600}
+.mlchat-m .ml-warn{color:var(--amber,#e0a940);font-weight:600}
+.mlchat-m.bot strong{font-weight:700}
+.mlchat-m.err{align-self:flex-start;background:transparent;border:0;
+  color:var(--red,#e06c75);font-size:12px}
+.mlchat-typing{align-self:flex-start;color:var(--text3,#888);font-size:12px;padding:2px 4px}
+.mlchat-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border2,#333)}
+.mlchat-input textarea{flex:1;resize:none;height:38px;background:var(--bg,#111);
+  color:var(--text,#eee);border:1px solid var(--border2,#333);border-radius:8px;
+  padding:8px 10px;font-family:inherit;font-size:13.5px}
+.mlchat-input textarea:focus{outline:none;border-color:var(--accent,#4f7cff)}
+.mlchat-input button{background:var(--accent,#d97757);color:#fff;border:0;border-radius:8px;
+  padding:0 14px;cursor:pointer;font-weight:700;font-size:13.5px;
+  transition:filter .15s ease,opacity .15s ease}
+.mlchat-input button:hover:not(:disabled){filter:brightness(1.1)}
+.mlchat-input button:disabled{opacity:.5;cursor:default}
+@media(max-width:480px){
+  .mlchat-panel{right:0;left:0;bottom:0;width:auto;height:72vh;max-height:72vh;
+    border-radius:12px 12px 0 0}
+  .mlchat-fab{right:16px;bottom:16px}}
+</style>
+<button type="button" class="mlchat-fab" id="mlchatFab" title="Ask about this screen"
+        aria-label="Open screen assistant">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+</button>
+<div class="mlchat-panel" id="mlchatPanel" role="dialog" aria-label="Screen assistant">
+  <div class="mlchat-head">Lattice Assist <span class="pg" id="mlchatPage"></span>
+    <button type="button" id="mlchatClose" title="Close" aria-label="Close">✕</button>
+  </div>
+  <div class="mlchat-msgs" id="mlchatMsgs"></div>
+  <div class="mlchat-input">
+    <textarea id="mlchatText" placeholder="Ask about this screen…" rows="1"></textarea>
+    <button type="button" id="mlchatSend">Send</button>
+  </div>
+</div>
+<script>var MlChat=(function(){var noop={open:function(){},close:function(){}};if(location.pathname==='/'){var fab0=document.getElementById('mlchatFab');var panel0=document.getElementById('mlchatPanel');if(fab0)fab0.style.display='none';if(panel0)panel0.style.display='none';return noop;}
+var history=[],busy=false,greeted=false;function el(id){return document.getElementById(id);}
+function ctx(){var c=(typeof window.ML_PAGE_CONTEXT==='function')?window.ML_PAGE_CONTEXT():window.ML_PAGE_CONTEXT;if(c&&c.page)return c;return{page:document.title||'MarketLattice',summary:'No page-specific data exposed.'};}
+function add(cls,text,html){var m=document.createElement('div');m.className='mlchat-m '+cls;if(html)m.innerHTML=html;else m.textContent=text;var box=el('mlchatMsgs');box.appendChild(m);box.scrollTop=box.scrollHeight;return m;}
+function open(){el('mlchatPanel').classList.add('open');el('mlchatPage').textContent='· '+ctx().page;if(!greeted){greeted=true;add('bot','Hi! I can answer questions about the '+ctx().page
++' screen — the numbers, charts, and what they mean.');}
+setTimeout(function(){el('mlchatText').focus();},50);}
+function close(){el('mlchatPanel').classList.remove('open');}
+async function send(){if(busy)return;var q=el('mlchatText').value.trim();if(!q)return;busy=true;el('mlchatText').value='';el('mlchatSend').disabled=true;add('user',q);var typing=document.createElement('div');typing.className='mlchat-typing';typing.textContent='thinking…';el('mlchatMsgs').appendChild(typing);el('mlchatMsgs').scrollTop=el('mlchatMsgs').scrollHeight;try{var r=await fetch('/api/screen-chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,history:history.slice(-10),model:localStorage['sec-model']||'',context:ctx()})});if(r.status===401){location.href='/login';return;}
+var d=await r.json();typing.remove();if(!r.ok){add('err',d.error||('HTTP '+r.status));}else{add('bot',d.answer||'(empty answer)',d.answer_html);history.push({role:'user',content:q},{role:'assistant',content:d.answer||''});}}catch(e){typing.remove();add('err','Request failed: '+e.message);}finally{busy=false;el('mlchatSend').disabled=false;el('mlchatText').focus();}}
+function init(){el('mlchatFab').addEventListener('click',function(){el('mlchatPanel').classList.contains('open')?close():open();});el('mlchatClose').addEventListener('click',close);el('mlchatSend').addEventListener('click',send);el('mlchatText').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});}
+if(document.readyState==='loading')
+document.addEventListener('DOMContentLoaded',init);else init();return{open:open,close:close};})();</script>
+
+</header>
+<script>(function(){var btn=document.getElementById('help-menu-btn');var list=document.getElementById('help-menu-list');function setOpen(open){list.classList.toggle('open',open);btn.setAttribute('aria-expanded',open?'true':'false');}
+btn.addEventListener('click',function(e){e.stopPropagation();setOpen(!list.classList.contains('open'));});list.addEventListener('click',function(){setOpen(false);});document.addEventListener('click',function(e){if(!list.contains(e.target))setOpen(false);});document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});})();</script>
+
+<div id="help-overlay" onclick="closeHelp()">
+  <div id="help-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div id="help-hd">
+      <div class="ic">▲</div>
+      <h2 id="help-title">How to use the Forecaster</h2>
+      <button class="mx" onclick="toggleMax('help-modal')" title="Enlarge / shrink" aria-label="Enlarge">⛶</button>
+      <button class="x" onclick="closeHelp()" aria-label="Close">✕</button>
+    </div>
+    <div id="help-body">
+      <h3>What this does</h3>
+      <p>The forecaster predicts how a whole <b>industry</b> (one of the Fama-French 48 sectors — Drugs, Banks, Oil, Chips, …) will move over the next four weeks: the median call plus a P10–P90 confidence band. Simple mode instead fits plain regression trend lines to a single company's price.</p>
+      <h3>Forecast modes</h3>
+      <ul>
+        <li><b>Complex · industry</b> (default) — the trained Event-Aware model. It reads a year of the industry's equal-weighted price index, its member companies' SEC 8-K filings, and global world events from the knowledge graph, and predicts <b>one number</b>: the index's next 4-week average vs its trailing 4-week average.</li>
+        <li><b>Simple · company</b> — a linear regression (straight trend line) plus a polynomial regression (curved trend line) fitted <i>on the fly</i> to exactly the history interval you selected for one company. Price history only — no events, no trained model needed.</li>
+      </ul>
+      <h3>Run a forecast</h3>
+      <ul>
+        <li><b>Industry</b> — pick one of the 46 forecastable sectors (member counts shown). In Simple mode this becomes a <b>company</b> search box instead.</li>
+        <li><b>8-K event scenario</b> — the event-driven core: ask “what does the model expect if this 8-K item is filed <i>today</i>?”. Pick an item type (e.g. Director or Officer Change) and how many member companies file it; the chart adds a teal line with the conditional forecast and the Δ vs baseline. One filing rarely moves a whole industry — sector-wide waves show clearer effects.</li>
+        <li><b>History (days)</b> — how much past context to display (40–1000). In Simple mode this is also the regression fit interval, and the forecast extends ~25% of it ahead (3–21 trading days).</li>
+        <li><b>Trend lines</b> — optional check-boxes (industry mode): overlay a <b>linear</b> and/or <b>polynomial</b> regression fitted to the displayed index history and extrapolated across the forecast window. Off by default; tick either or both — the chart updates instantly. They are descriptive fits for eyeballing momentum, not model output.</li>
+        <li><b>Metric tooltips</b> — hover (or tap) any statistic above the chart — direction accuracy, P10…P90, index value, Δ pp, … — for a plain-English explanation with a worked stock-price example.</li>
+        <li><b>Δ vs market · significance</b> — each industry forecast also reports whether the sector's recent 4-week move genuinely diverged from the market or is within noise: four statistical tests (paired drift, Wilcoxon, β-adjusted event study, placebo baskets) run against the market with the industry's own members excluded. ✓ marks p &lt; 0.05 on the β-adjusted test; the footer lists all four p-values. See “How do we Forecast” for the full methodology.</li>
+        <li>Click <b>Forecast</b> (or press Enter).</li>
+      </ul>
+      <h3>Reading the industry chart</h3>
+      <ul>
+        <li><b>Blue</b> — the industry's equal-weighted return index, rebased to 100 at the left edge of the chart.</li>
+        <li><b>Grey dashed</b> — the trailing 4-week average of the index (what the model measures "up or down" against).</li>
+        <li><b>Purple dashed</b> — the model's median prediction of the <i>next</i> 4-week average, drawn flat across the coming 20 trading days. Purple above grey = the industry is predicted to rise.</li>
+        <li><b>Shaded band</b> — P10–P90 range of that prediction (model uncertainty).</li>
+        <li><b>Amber bars</b> (right axis) — daily 8-K filings by the industry's member companies. These counts, total and per item type, are fed to the model's encoder — hover a bar to see the item-type breakdown driving that day.</li>
+        <li><b>Teal dashed</b> (scenario runs only) — the forecast conditional on the chosen 8-K filings happening at the anchor day; the gap to the purple line is the event's estimated impact in percentage points.</li>
+        <li>The stats row shows the predicted move in %, its P10–P90 range, and this industry's real accuracy on held-out 2024→2026 data.</li>
+      </ul>
+      <h3>Reading the company chart (Simple)</h3>
+      <ul>
+        <li><b>Blue</b> — historical closes · <b>Purple dashed</b> — linear trend · <b>Amber dotted</b> — polynomial trend · <b>Grey dashed</b> — broad-market baseline rebased to the stock's start.</li>
+        <li>No confidence band: a least-squares band on autocorrelated prices would be misleadingly narrow.</li>
+      </ul>
+      <h3>Export</h3>
+      <p>Use <b>Export PDF</b> to save the current forecast — summary stats and chart — as a PDF via your browser's print dialog (choose “Save as PDF”).</p>
+    </div>
+  </div>
+</div>
+
+<div id="info-overlay" onclick="closeInfo()">
+  <div id="info-modal" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="info-title">
+    <div id="info-hd">
+      <div class="ic">Ƒ</div>
+      <h2 id="info-title">How do we Forecast</h2>
+      <button class="mx" onclick="toggleMax('info-modal')" title="Enlarge / shrink" aria-label="Enlarge">⛶</button>
+      <button class="x" onclick="closeInfo()" aria-label="Close">✕</button>
+    </div>
+    <div id="info-body">
+      <h3>The model in one paragraph</h3>
+      <p>Forecasts come from an <b>Event-Aware Temporal Fusion Transformer (TFT)</b> that models whole <b>industries, not single stocks</b>. Every company in the knowledge graph is classified into one of the <b>Fama-French 48</b> industries (via its SEC SIC code — 96% coverage after an EDGAR backfill), and each industry gets an <b>equal-weighted return index</b>: the average daily log-return of its member companies, compounded. The network reads the last <b>252 trading days</b> of that index (returns, volatility, member count, the members' 8-K filing intensity by event type, and global world events) and predicts <b>one number</b>: the index's <b>next 4-week average vs its trailing 4-week average</b>, as three quantiles — P10, P50 (median), P90 — the purple line and shaded band on the chart.</p>
+
+      <h3>How the pieces fit together</h3>
+      <div class="figwrap">
+        <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#8b9bb0"/>
+            </marker>
+          </defs>
+          
+          <rect x="8" y="12" width="170" height="52" rx="8" fill="rgba(88,166,255,.14)" stroke="#58a6ff"/>
+          <text x="93" y="33" text-anchor="middle" font-size="12" font-weight="700" fill="#58a6ff">Industry index</text>
+          <text x="93" y="50" text-anchor="middle" font-size="10" fill="#8b9bb0">equal-weighted returns · volatility</text>
+          <rect x="8" y="76" width="170" height="52" rx="8" fill="rgba(45,212,191,.12)" stroke="#2dd4bf"/>
+          <text x="93" y="97" text-anchor="middle" font-size="12" font-weight="700" fill="#2dd4bf">Members' 8-K filings</text>
+          <text x="93" y="114" text-anchor="middle" font-size="10" fill="#8b9bb0">daily counts by event type</text>
+          <rect x="8" y="140" width="170" height="52" rx="8" fill="rgba(185,143,255,.12)" stroke="#b98fff"/>
+          <text x="93" y="161" text-anchor="middle" font-size="12" font-weight="700" fill="#b98fff">World events</text>
+          <text x="93" y="178" text-anchor="middle" font-size="10" fill="#8b9bb0">daily counts per category</text>
+          <rect x="8" y="204" width="170" height="38" rx="8" fill="rgba(139,155,176,.10)" stroke="#8b9bb0"/>
+          <text x="93" y="227" text-anchor="middle" font-size="11" font-weight="700" fill="#8b9bb0">Calendar (known future)</text>
+          
+          <line x1="178" y1="38" x2="238" y2="92" stroke="#8b9bb0" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="178" y1="102" x2="238" y2="112" stroke="#8b9bb0" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="178" y1="166" x2="238" y2="132" stroke="#8b9bb0" stroke-width="1.5" marker-end="url(#arr)"/>
+          <line x1="178" y1="223" x2="238" y2="152" stroke="#8b9bb0" stroke-width="1.5" marker-end="url(#arr)"/>
+          
+          <rect x="240" y="62" width="150" height="120" rx="10" fill="rgba(88,166,255,.10)" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="315" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="#58a6ff">Encoder</text>
+          <text x="315" y="110" text-anchor="middle" font-size="10" fill="#8b9bb0">last 252 trading days</text>
+          <text x="315" y="126" text-anchor="middle" font-size="10" fill="#8b9bb0">feature selection (VSN)</text>
+          <text x="315" y="142" text-anchor="middle" font-size="10" fill="#8b9bb0">LSTM + attention</text>
+          <text x="315" y="165" text-anchor="middle" font-size="10" fill="#8b9bb0">+ industry embedding</text>
+          
+          <line x1="390" y1="122" x2="448" y2="122" stroke="#8b9bb0" stroke-width="1.5" marker-end="url(#arr)"/>
+          
+          <rect x="450" y="62" width="140" height="120" rx="10" fill="rgba(185,143,255,.10)" stroke="#b98fff" stroke-width="1.5"/>
+          <text x="520" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="#b98fff">Decoder</text>
+          <text x="520" y="110" text-anchor="middle" font-size="10" fill="#8b9bb0">one step: the next</text>
+          <text x="520" y="126" text-anchor="middle" font-size="10" fill="#8b9bb0">4-week average</text>
+          <text x="520" y="142" text-anchor="middle" font-size="10" fill="#8b9bb0">attends over history ·</text>
+          <text x="520" y="158" text-anchor="middle" font-size="10" fill="#8b9bb0">only calendar inputs</text>
+          <text x="520" y="174" text-anchor="middle" font-size="10" fill="#8b9bb0">(no future peeking)</text>
+          
+          <line x1="590" y1="122" x2="640" y2="122" stroke="#8b9bb0" stroke-width="1.5" marker-end="url(#arr)"/>
+          
+          <path d="M642,122 C670,100 690,84 712,70" fill="none" stroke="#b98fff" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <path d="M642,122 C674,122 690,122 712,122" fill="none" stroke="#b98fff" stroke-width="2.5"/>
+          <path d="M642,122 C670,144 690,160 712,174" fill="none" stroke="#b98fff" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="712" y="62" text-anchor="end" font-size="10" fill="#8b9bb0">P90</text>
+          <text x="712" y="114" text-anchor="end" font-size="10" fill="#b98fff" font-weight="700">P50 median</text>
+          <text x="712" y="190" text-anchor="end" font-size="10" fill="#8b9bb0">P10</text>
+        </svg>
+        <div class="figcap">Data flow: industry-aggregated graph features → 252-day encoder → single-step decoder → three quantiles of the next 4-week-average move.</div>
+      </div>
+
+      <h3>How the training data is built (v2 restructuring)</h3>
+      <ul>
+        <li><b>Industry classification</b> — every company's SEC SIC code (fetched from EDGAR for 96% of the 20,363 companies) maps it into one of the Fama-French 48 industries. Bucket 48 “Other” and unclassifiable companies are excluded, leaving 46 usable industries built from <b>19,287 companies</b>.</li>
+        <li><b>Index construction</b> — an industry's daily value is the <i>average log-return of every member with a price that day</i>, compounded into an index. Averaging returns (not prices) keeps the index immune to IPOs, delistings, splits, and penny-stock noise; days with fewer than 5 members are dropped; a company's first trading day contributes no return.</li>
+        <li><b>Smoothed target</b> — daily industry moves are noisy, so the model predicts the <b>average of the next 20 trading days</b> minus the <b>average of the last 20</b> of the index log-level: “is this industry's coming month better than its past month, and by how much?”</li>
+        <li><b>No-leakage rules</b> — 8-K filings made on weekends/holidays roll <i>forward</i> to the next trading day (never backward); the encoder sees only days up to the anchor; train/validation/test splits are separated by a 20-day embargo equal to the forecast horizon.</li>
+        <li><b>Event scenarios</b> — the "what if" mode injects hypothetical 8-K filings (a chosen item type × count) into the anchor day's event channels, exactly the way real filings enter the encoder, and re-runs the model. The difference between the conditional and baseline forecasts is the model's estimated near-term impact of that event type on the industry.</li>
+      </ul>
+
+      <h3>Training &amp; validation loss</h3>
+      <div class="figwrap">
+        <svg viewBox="0 0 640 230" xmlns="http://www.w3.org/2000/svg" font-family="inherit">
+          
+          <line x1="45" y1="22.1" x2="585" y2="22.1" stroke="#8b9bb0" stroke-opacity=".25"/>
+          <line x1="45" y1="92.9" x2="585" y2="92.9" stroke="#8b9bb0" stroke-opacity=".25"/>
+          <line x1="45" y1="163.8" x2="585" y2="163.8" stroke="#8b9bb0" stroke-opacity=".25"/>
+          <text x="40" y="25" text-anchor="end" font-size="10" fill="#8b9bb0">0.35</text>
+          <text x="40" y="96" text-anchor="end" font-size="10" fill="#8b9bb0">0.25</text>
+          <text x="40" y="167" text-anchor="end" font-size="10" fill="#8b9bb0">0.15</text>
+          
+          <line x1="45" y1="15" x2="45" y2="185" stroke="#8b9bb0" stroke-opacity=".6"/>
+          <line x1="45" y1="185" x2="585" y2="185" stroke="#8b9bb0" stroke-opacity=".6"/>
+          
+          <polyline points="45,94.2 112.5,124.2 180,139.3 247.5,149.5 315,155.9 382.5,161.9 450,167.9 517.5,173.8 585,177.6"
+                    fill="none" stroke="#58a6ff" stroke-width="2"/>
+          
+          <polyline points="45,128.9 112.5,110.3 180,87.6 247.5,94.2 315,57.2 382.5,59.4 450,36.8 517.5,32.3 585,25.3"
+                    fill="none" stroke="#b98fff" stroke-width="2"/>
+          
+          <circle cx="45" cy="128.9" r="4.5" fill="#2dd4bf"/>
+          <line x1="45" y1="128.9" x2="45" y2="185" stroke="#2dd4bf" stroke-dasharray="3 3" stroke-opacity=".7"/>
+          <text x="53" y="124" font-size="10" fill="#2dd4bf" font-weight="700">best checkpoint (epoch 0, val 0.1993)</text>
+          
+          <text x="45" y="200" text-anchor="middle" font-size="10" fill="#8b9bb0">0</text>
+          <text x="180" y="200" text-anchor="middle" font-size="10" fill="#8b9bb0">2</text>
+          <text x="315" y="200" text-anchor="middle" font-size="10" fill="#8b9bb0">4</text>
+          <text x="450" y="200" text-anchor="middle" font-size="10" fill="#8b9bb0">6</text>
+          <text x="585" y="200" text-anchor="middle" font-size="10" fill="#8b9bb0">8</text>
+          <text x="315" y="216" text-anchor="middle" font-size="10" fill="#8b9bb0">epoch</text>
+          
+          <line x1="440" y1="156" x2="466" y2="156" stroke="#58a6ff" stroke-width="2"/>
+          <text x="471" y="160" font-size="10" fill="#8b9bb0">training loss</text>
+          <line x1="440" y1="170" x2="466" y2="170" stroke="#b98fff" stroke-width="2"/>
+          <text x="471" y="174" font-size="10" fill="#8b9bb0">validation loss</text>
+        </svg>
+        <div class="figcap">Quantile (pinball) loss per epoch for the production FF48 model. With 46 heavily-overlapping series the network starts memorizing after the first pass — validation is best at epoch 0 and early stopping deploys exactly that checkpoint; training loss falling while validation rises is textbook overfitting, caught and discarded.</div>
+      </div>
+      <p>Trained on <b>117,741 windows</b> over 46 industry indices built from 19,287 classified companies (2010 → Jul 2021); validated on 26,818 windows (Aug 2021 → Jan 2024); tested on <b>26,754 windows</b> (Feb 2024 → Jun 2026). Splits are strictly time-ordered with a 20-trading-day embargo, so the model is always scored on a future it has never seen.</p>
+
+      <h3>Performance on the held-out test set (26,754 forecasts, Feb 2024 → Jun 2026)</h3>
+      <p>Every forecast is compared against two honest baselines: <b>always-flat</b> (predict “no move”; its direction score is the majority-direction rate) and <b>momentum</b> (predict that the last 4-week trend simply repeats).</p>
+      <table>
+        <tr><th>Metric</th><th>Model</th><th>Always-flat</th><th>Momentum</th><th>What it means</th></tr>
+        <tr><td>Direction accuracy</td><td><b>66.4%</b></td><td>57.9%</td><td>57.4%</td><td>How often the up/down call on the next 4-week average is right — <b>+8.5 points</b> over the best naive strategy (validation period: 73.8% vs 65.7%). Significance-tested below — decisive vs momentum, not yet at 5% vs the best fixed call.</td></tr>
+        <tr><td>Mean absolute error</td><td><b>0.0396</b></td><td>0.0452</td><td>0.0549</td><td>Average miss on the predicted 4-week move, in log-return units (0.0396 ≈ 4.0 percentage points of index move) — <b>12% tighter</b> than always-flat, 28% tighter than momentum.</td></tr>
+        <tr><td>RMSE</td><td><b>0.0531</b></td><td>0.0610</td><td>0.0736</td><td>Same comparison with big misses weighted harder — the model's edge survives outlier weighting.</td></tr>
+      </table>
+
+      <h3>How these numbers were obtained</h3>
+      <ul>
+        <li><b>Held-out evaluation</b> — the deployed weights are the epoch-0 checkpoint (best validation loss), reloaded from the saved bundle and scored once on the test region; no test data ever influenced training, feature scaling, or model selection.</li>
+        <li><b>One forecast per industry per trading day</b> — 26,754 test forecasts = every (industry, anchor day) pair from Feb 2024 to Jun 2026 across the 46 industries; the reported numbers pool them all, with no cherry-picking of dates or sectors.</li>
+        <li><b>Skill varies by industry</b> — direction accuracy ranges from ~75% (Guns, Fun, BldMt) down to ~55% (Food, Insur). The stats row and footer of every chart show the <i>selected</i> industry's own held-out accuracy, from the same evaluation.</li>
+        <li><b>Why it clears the coin-flip bar that single stocks couldn't</b> — the previous per-company model scored 51.6% direction accuracy (barely above chance, as efficient-market theory predicts for liquid single names). Industry aggregates average away idiosyncratic noise and move more slowly, so real, learnable structure remains — the restructuring, not a bigger network, is what bought the extra ~15 points.</li>
+      </ul>
+
+      <h3>Statistical significance testing — is the model's edge real?</h3>
+      <p>Beating a baseline on average is not enough: with 26,754 test forecasts the difference could still be luck, because those forecasts are <b>massively dependent</b> — consecutive anchor days share 19 of 20 future days and 251 of 252 encoder days, and all 46 industries live on the same trading calendar. A naive t-test that pretends the 26,754 errors are independent would overstate the evidence absurdly. We therefore test the edge the way the forecasting literature prescribes:</p>
+      <ul>
+        <li><b>Collapse to one number per trading day</b> — model-vs-baseline loss differentials are averaged across the 46 industries per anchor date (583 test dates), removing the cross-sectional dependence.</li>
+        <li><b>Diebold–Mariano test with Newey–West (HAC) variance</b> — the per-date differential series is still autocorrelated (overlapping 20-day smoothing windows), so its long-run variance is estimated with a Bartlett kernel at lag 40 = 2× the smoothing window, and the t-statistic uses that corrected variance.</li>
+        <li><b>Per-industry tests + FDR</b> — the same DM/HAC test runs inside each of the 46 industries, and because scanning 46 hypotheses at once guarantees a few lucky p-values, the per-industry p's are Benjamini–Hochberg corrected into false-discovery-rate q-values.</li>
+      </ul>
+      <table>
+        <tr><th>Held-out test (Feb 2024 → Jun 2026)</th><th>Result</th><th>Significant?</th></tr>
+        <tr><td>Forecast error (|e|) vs <b>always-flat</b></td><td>DM t = −4.84</td><td><b>yes — p ≈ 1.6×10⁻⁶</b></td></tr>
+        <tr><td>Forecast error (|e|) vs <b>momentum</b></td><td>DM t = −4.82</td><td><b>yes — p ≈ 1.8×10⁻⁶</b></td></tr>
+        <tr><td>Squared error vs always-flat</td><td>DM t = −5.60</td><td><b>yes — p ≈ 3.3×10⁻⁸</b></td></tr>
+        <tr><td>Direction accuracy 66.4% vs <b>momentum</b> 57.4%</td><td>HAC t = +3.29</td><td><b>yes — p ≈ 0.001</b></td></tr>
+        <tr><td>Direction accuracy 66.4% vs <b>best fixed call</b> 57.9%</td><td>HAC t = +1.55</td><td><b>no</b> — p = 0.12 (one-sided 0.06)</td></tr>
+        <tr><td>Per-industry error edge vs always-flat</td><td>9 / 46 industries at q &lt; 0.05</td><td>Smoke, Fun, Mines, Cnstr, Coal, BldMt, MedEq, Guns, Txtls</td></tr>
+      </table>
+      <p>Read honestly: the model's <b>error reduction is statistically unambiguous</b> (p-values around 10⁻⁶ survive even the harsh HAC correction; on validation the same test gives p ≈ 4×10⁻¹³ with 41/46 industries significant), and its direction calls beat momentum decisively. But the +8.5-point direction gap over the <i>best fixed call</i> — a baseline chosen in-sample, so a deliberately hard bar — does <b>not</b> clear 5% significance, because directional hits cluster in market regimes and the effective sample is hundreds of dates, not tens of thousands of windows. Per-industry accuracy badges should be read with their q-values (shown in the chart footer), not their raw percentages. This report (<code>ff48_significance_report.json</code>) is regenerated automatically at the end of <b>every training run</b>, so no future model ships without its significance audit.</p>
+
+      <h3>Statistical significance testing — is an industry's move real?</h3>
+      <p>Every industry forecast also answers a second question, live: <i>has this industry actually been moving differently from the market over the trailing 4 weeks, or is the gap noise?</i> The market benchmark is the equal-weighted mean return of all classified companies <b>excluding the industry's own members</b> (leaving them in would attenuate the very effect being measured — an industry with weight w only shows (1−w) of its true divergence). Four tests run on the last 20 trading days, in increasing order of rigor:</p>
+      <ul>
+        <li><b>Naive slope comparison (shown for reference, never trusted)</b> — the textbook move: fit ln P = a + b·t to both log-price series, t-test b<sub>industry</sub> − b<sub>market</sub> with Welch–Satterthwaite dof. It is statistically broken twice over: it treats the two series as independent when they are strongly correlated (misstating Var(b<sub>S</sub> − b<sub>M</sub>), which needs the −2·Cov term), and it regresses near-random-walk levels on time — the classic <b>spurious-trend regression</b> whose autocorrelated residuals make the t-statistic reject far too often. On live data it reports p &lt; 0.0001 for practically every industry, every day — a working demonstration of manufactured significance. We compute it only to show what the valid tests correct.</li>
+        <li><b>Paired drift test (the valid version of the same idea)</b> — because both regressions share one time index, b<sub>S</sub> − b<sub>M</sub> equals the slope of the difference series D<sub>t</sub> = ln S<sub>t</sub> − ln M<sub>t</sub>, which handles the correlation automatically; and differencing D<sub>t</sub> (the cure for the spurious regression) leaves d<sub>t</sub> = r<sub>S,t</sub> − r<sub>M,t</sub>, so the whole construction collapses to a one-sample t-test of E[d<sub>t</sub>] = 0 (t = d̄ / (s<sub>d</sub>/√n), n−1 dof). A <b>Wilcoxon signed-rank</b> test on the same d<sub>t</sub> rides along as a fat-tail-robust check — with n = 20 days, one crazy day can dominate a mean.</li>
+        <li><b>Market-model event study (the headline p-value in the stats bar)</b> — a raw return gap conflates leverage with divergence: a β = 1.3 industry "diverges" mechanically whenever the market moves. So we first estimate r<sub>S</sub> = α + β·r<sub>M</sub> + ε on the 120 trading days <i>before</i> the window, then compute abnormal returns AR<sub>t</sub> = r<sub>S,t</sub> − α̂ − β̂·r<sub>M,t</sub> in the window, cumulate to CAR, and test CAR against its forecast-error-corrected variance Σσ̂²(1 + 1/T + (r<sub>M,t</sub> − r̄<sub>M</sub>)²/Σ(r<sub>M,τ</sub> − r̄<sub>M</sub>)²). This answers what people usually mean: did the industry move beyond its normal sensitivity to the market.</li>
+        <li><b>Placebo (permutation) test</b> — the assumption-free cross-check: draw 2,000 random company baskets of the same size from the classified universe, compute the identical statistic for each (its own members excluded from its own benchmark, symmetrically), and report the fraction of draws at least as extreme (add-one smoothed, two-sided). It respects cross-stock correlation by construction. One honest subtlety: random baskets do not preserve an industry's <i>internal</i> co-movement, so for tightly coherent sectors the placebo p tends to run more liberal than the paired t — when the two disagree, the paired t-test is the conservative reading.</li>
+      </ul>
+      <p><b>Power, stated plainly:</b> with n = 20 days, significance at 5% needs |d̄| ≥ 2.09·s<sub>d</sub>/√20 ≈ 0.47·s<sub>d</sub> per day. For a typical industry with ~1% daily tracking volatility that means roughly 9–10% of cumulative divergence in four weeks just to reach the boundary (the exact threshold for the selected industry is computed per request) — so <b>absence of significance is weak evidence of absence</b>, and a non-significant gap is never evidence that nothing happened. Conversely, when you scan 46 industries at once, expect ~2 spuriously "significant" ones at p &lt; 0.05 — treat a lone ✓ as a lead, not a verdict.</p>
+      <h3>Where we go next</h3>
+      <p>v2's industry restructuring was our “mindful data processing first” step — cohorts with a denoised target — and it moved the needle. The same philosophy drives what's next:</p>
+      <ul>
+        <li><b>Band calibration</b> — audit P10–P90 coverage on validation windows and conformally widen/narrow the band per industry so “80% band” means 80% empirically.</li>
+        <li><b>Company-relative forecasts</b> — predict a stock's move <i>relative to its industry index</i> (the part events actually explain), reintroducing single-name forecasts on top of the industry signal rather than instead of it.</li>
+        <li><b>Richer event features</b> — filing-text embeddings and severity scores for 8-K items, rather than daily counts by type alone.</li>
+        <li><b>Fresh anchoring</b> — scheduled refresh of the price cache so industry forecasts always anchor at the latest close rather than the latest snapshot.</li>
+        <li><b>Overfitting headroom</b> — validation bottoms at epoch 0; larger sample strides, stronger dropout, or fewer parameters may unlock further gains from the same data.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div id="print-head">
+    <div class="pt-logo">▲</div>
+    <div class="pt-title">MarketLattice · Industry Forecast</div>
+    <div class="pt-meta"></div>
+  </div>
+  <div class="controls">
+    <div class="field" id="catField">
+      <label for="category">Industry (Fama-French 48)</label>
+      <select id="category" style="min-width:340px"><option value="">Loading industries…</option></select>
+    </div>
+    <div class="field" id="companyField" style="display:none">
+      <label for="company">Company</label>
+      <div class="combo" id="combo">
+        <input id="company" placeholder="Search by name, ticker, or CIK…" autocomplete="off"
+               role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="companyMenu">
+        <span class="combo-caret">▾</span>
+        <div class="combo-menu" id="companyMenu" role="listbox"></div>
+      </div>
+    </div>
+    <button id="go">Forecast</button>
+    <details class="adv" id="advOpts">
+      <summary>Advanced options</summary>
+      <div class="adv-body">
+        <div class="field" id="evtField">
+          <label for="evtType" title="Condition the forecast on member companies filing this 8-K item on the anchor day">8-K event scenario</label>
+          <select id="evtType" style="min-width:250px"><option value="">None · baseline forecast</option></select>
+        </div>
+        <div class="field" id="evtCountField">
+          <label for="evtCount" title="How many member companies file it">Filings</label>
+          <select id="evtCount">
+            <option value="1">1 · one company</option>
+            <option value="5">5 · several</option>
+            <option value="15" selected>15 · sector-wide</option>
+            <option value="40">40 · extreme wave</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="history">History (days)</label>
+          <input id="history" type="number" min="40" max="1000" value="180">
+        </div>
+        <div class="field" id="trendField">
+          <label title="Regression lines fitted to the displayed index history and extrapolated over the forecast window">Trend lines</label>
+          <div class="trend-checks">
+            <label class="chk"><input type="checkbox" id="chkLin"> Linear</label>
+            <label class="chk"><input type="checkbox" id="chkPoly"> Polynomial</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Mode</label>
+          <div class="seg" id="modeSeg" role="radiogroup" aria-label="Forecast mode">
+            <button type="button" id="mode-simple" role="radio" aria-checked="false"
+                    title="On-the-fly linear + polynomial regression on one company's closes — trend lines through past and future">Simple · company</button>
+            <button type="button" id="mode-complex" class="on" role="radio" aria-checked="true"
+                    title="Trained event-aware model — forecasts a whole industry's equal-weighted index">Complex · industry</button>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div class="layout">
+  <aside class="card" id="suscPanel">
+    <h3>Most susceptible industries</h3>
+    <div id="suscSub">Ranked by the model's predicted 4-week move when this 8-K item hits the industry. Click one to forecast it.</div>
+    <div id="suscMsg">Pick an <b>8-K event scenario</b> (under <b>Advanced options</b>) to rank all 46 industries by susceptibility to it.</div>
+    <ul id="suscList" hidden></ul>
+  </aside>
+
+  <div class="card">
+    <div class="stats" id="stats"></div>
+    <div id="metricTip" role="tooltip"></div>
+    <div id="msg">Pick an industry and click <b>Forecast</b> to see its equal-weighted index history and the model's prediction of the next 4-week average, with a confidence band. <b>Advanced options</b> holds event scenarios, trend lines, and the per-company Simple mode.</div>
+    <div id="chartWrap" style="display:none"><canvas id="chart"></canvas></div>
+    <div class="legend" id="legend" style="display:none">
+      <span id="legend-hist"><i style="background:#58a6ff"></i><span id="legend-hist-txt">Industry index (equal-weighted)</span></span>
+      <span id="legend-fc"><i style="background:#b98fff"></i><span id="legend-fc-txt">Predicted next 4-week average</span></span>
+      <span id="legend-trail" style="display:none"><i style="background:#8b9bb0"></i>Trailing 4-week average</span>
+      <span id="legend-poly" style="display:none"><i style="background:#ffa657"></i>Polynomial trend</span>
+      <span id="legend-band"><i class="band" style="background:rgba(185,143,255,.22)"></i>Confidence band (P10–P90)</span>
+      <span id="legend-evt" style="display:none"><i class="band" style="background:rgba(255,166,87,.45)"></i>8-K filings by member companies (model input)</span>
+      <span id="legend-scn" style="display:none"><i style="background:#2dd4bf"></i><span id="legend-scn-txt">Scenario forecast</span></span>
+      <span id="legend-lin-cat" style="display:none"><i style="background:#f778ba"></i>Linear trend (fit + extrapolation)</span>
+      <span id="legend-poly-cat" style="display:none"><i style="background:#3fb950"></i><span id="legend-poly-cat-txt">Polynomial trend</span></span>
+      <span id="legend-mkt" style="display:none"><i style="background:#8b9bb0"></i>Market · equal-weight IQR index (rebased)</span>
+    </div>
+    <div class="foot" id="foot"></div>
+  </div>
+  </div>
+</main>
+
+<script>const $=s=>document.querySelector(s);const combo=$('#combo'),companyInput=$('#company'),menu=$('#companyMenu'),historyInput=$('#history'),goBtn=$('#go'),catSel=$('#category'),msg=$('#msg'),stats=$('#stats'),chartWrap=$('#chartWrap'),legend=$('#legend'),legendMkt=$('#legend-mkt'),foot=$('#foot');let chart=null;let lastData=null;let lastKind=null;let avgWindow=20;let companies=[];let companiesLoaded=false;let filtered=[];let activeIdx=-1;let selectedCik=null;let mode='complex';const METRIC_INFO={industry:{t:'FF48 industry',b:`The Fama-French 48 classification sorts every SEC filer into one of 48 sectors
+    by its SIC industry code. The chart tracks this whole sector's <b>equal-weighted price index</b> — a basket of all
+    member companies — not any single stock.
+    <span class="ex"><b>Example:</b> 'Drugs' pools every pharma & biotech filer. Pfizer at $28 and a $4 micro-cap
+    biotech count equally: each contributes its daily <i>percent</i> move, not its dollar price.</span>`},members:{t:'Member companies',b:`How many companies' share prices are averaged into this industry index right now.
+    <b>Equal-weighted</b>: every member's daily percentage move counts the same, whatever its market cap.
+    <span class="ex"><b>Example:</b> in a 250-member index, one stock jumping +10% while the rest sit still moves the
+    index by 10% ÷ 250 = <b>+0.04%</b>. Broad sector moves, not single names, drive this chart.</span>`},index:{t:'Index value (rebased to 100)',b:`The value of the equal-weighted member basket, scaled so the LEFT edge of the
+    chart equals 100. It measures cumulative percentage return over the visible window — it is <b>not a dollar price</b>.
+    <span class="ex"><b>Example:</b> an index of <b>104.20</b> means $100 spread equally across all members at the chart's
+    start would be worth $104.20 today — a +4.2% sector return. A fall from 100 to 97 = −3%.</span>`},next4w:{t:'Next 4-wk avg vs trailing',b:`The model's single output: the predicted change of the index's <b>average over the
+    NEXT 20 trading days</b> (≈ 4 weeks, purple line) relative to its <b>average over the LAST 20</b> (grey line).
+    Comparing month-long averages smooths out daily noise — this is not a day-20 price target.
+    <span class="ex"><b>Example:</b> trailing 4-week average = 102.0 and prediction = <b>+2.50%</b> → the model expects
+    the next month to average ≈ 104.6. Green = predicted rise, red = predicted fall.</span>`},band:{t:'P10 … P90 uncertainty band',b:`The model predicts a <b>range</b>, not one number. P10 and P90 bound the middle
+    80% of outcomes it considers plausible: a 10% chance the true move lands below P10, 10% above P90. A wide band =
+    high uncertainty (volatile industry or conflicting signals).
+    <span class="ex"><b>Example:</b> median +2.5% with band [−1.2% … +4.1%]: a rise is the central call, but a small
+    dip stays plausible. If the index's next 4-wk avg comes in at +3.0%, that's inside the band — as designed,
+    roughly 8 of 10 forecasts should land inside.</span>`},sig:{t:'Is the divergence statistically significant?',b:`Four tests ask whether this industry's move over the last 20 trading days
+    is <b>real divergence from the market</b> (all other classified companies, members excluded) or just noise. The headline p-value is the
+    <b>market-model event study</b>: it first learns the industry's normal sensitivity to the market (β) from the prior 120 days, then tests
+    whether the recent gap exceeds what β alone explains. Shown alongside: a paired drift t-test + Wilcoxon on daily return gaps, and a
+    placebo test comparing against 2,000 random same-size company baskets. p &lt; 0.05 = unlikely to be chance.
+    <span class="ex"><b>Example:</b> “−4.1% · p 0.003” = the industry ran 4.1% below the market in 4 weeks, and a gap that large
+    would arise by chance fewer than 3 times in 1,000 — statistically significant divergence. With only 20 trading days, small
+    real gaps often can't reach significance — absence of proof isn't proof of absence.</span>`},diracc:{t:'Held-out direction accuracy',b:`Of all forecasts the model made for <b>this industry</b> on held-out test data
+    (Feb 2024 → Jun 2026 — dates it never saw in training), the share where the predicted <b>direction</b> (next 4-wk avg
+    UP or DOWN vs trailing) matched what actually happened. It scores the sign only — magnitude errors don't count here.
+    <span class="ex"><b>Example:</b> <b>66%</b> = about 2 of every 3 up/down calls were right. Benchmarks: coin flip = 50%,
+    always predicting this period's majority direction = 57.9% (all-industry avg). Predicting +1% counts as a hit if the
+    index rose even +0.1%, and as a miss if it fell −0.1%.</span>`},scenario_ind:{t:'Scenario forecast (Δ pp)',b:`The same forecast re-run as if the chosen 8-K filings were filed <b>today</b> by
+    member companies — injected into the model's event channels exactly as real filings enter it. <b>Δ pp</b> = scenario
+    median minus baseline median, in percentage points: the event's estimated impact on the 4-week outlook.
+    <span class="ex"><b>Example:</b> baseline +2.50%, scenario with 5 × “Bankruptcy” filings +1.90% → <b>Δ −0.60 pp</b>.
+    One filing among hundreds of members rarely moves the needle; sector-wide waves show clearer effects.</span>`},company:{t:'Company',b:`The single stock being forecast, resolved to its SEC identity (ticker / CIK). Simple mode
+    fits trend lines to <b>this company's own closing prices</b> over exactly the history window you selected — no events,
+    no industry context.
+    <span class="ex"><b>Example:</b> AAPL · CIK 0000320193 — only Apple's closes enter the fit; a market-wide rally
+    or an 8-K filing changes nothing here (that's Complex mode's job).</span>`},lastclose:{t:'Last close',b:`The company's most recent closing price in the data (adjusted for splits and dividends),
+    with its trading date. Every forecast line extends forward from this anchor point.
+    <span class="ex"><b>Example:</b> “$178.42 · 2026-06-30” — the last trading day on record closed at $178.42; the
+    projected change is measured from this price.</span>`},fcmedian:{t:'Forecast median',b:`Where the fitted regression trend line sits at the END of the forecast window (~25% of
+    your history window ahead). It extrapolates the recent trend — a descriptive momentum estimate, not an event-aware
+    model prediction.
+    <span class="ex"><b>Example:</b> last close $150.00 and a mild uptrend over your 180-day window → the line reaches
+    <b>$153.20</b> ten trading days out. If the window had ended in a downtrend, the same math would project below $150.</span>`},projchange:{t:'Projected change',b:`The percentage difference between the forecast median and the last close — how far
+    the extrapolated trend line drifts from today's price by the end of the forecast window.
+    <span class="ex"><b>Example:</b> last close $150.00 → forecast median $153.20 = <b>+2.13%</b>. Green = the trend
+    points up, red = down. It inherits all the trend line's assumptions — momentum continuing, nothing else changing.</span>`},modelkind:{t:'Model',b:`Which engine produced this forecast. <b>Simple</b> = linear + polynomial regressions fitted
+    on the fly to one company's displayed price history (price-only, no training). <b>Complex</b> = the trained
+    event-aware neural network that reads a year of industry index history plus member 8-K filings and world events.
+    <span class="ex"><b>Example:</b> Simple answers “where does AAPL's recent trend point?”; Complex answers “what does
+    the whole Drugs sector's next month look like, given its filings?”.</span>`},scenario_lbl:{t:'Scenario',b:`The hypothetical 8-K event being injected into the forecast — as if member companies
+    filed it today. The teal chart line shows the forecast under this assumption.
+    <span class="ex"><b>Example:</b> “Director or Officer Change × 5” asks: if five member companies announced executive
+    departures today, how would the sector's 4-week outlook shift?</span>`},scenario_delta:{t:'Scenario vs baseline',b:`How much the scenario shifts the forecast relative to the baseline (no-event)
+    prediction — the gap between the teal and purple lines at the forecast horizon.
+    <span class="ex"><b>Example:</b> baseline projects +2.50% and the scenario +1.90% → <b>−0.60%</b>: the modeled market
+    reaction to the event, all else equal.</span>`},};const tipEl=$('#metricTip');function showTip(tile){const info=METRIC_INFO[tile.dataset.info];if(!info)return;tipEl.innerHTML=`<h4>${info.t}</h4>${info.b}`;tipEl.style.display='block';const r=tile.getBoundingClientRect(),tw=tipEl.offsetWidth,th=tipEl.offsetHeight;let x=Math.min(Math.max(8,r.left),window.innerWidth-tw-12);let y=r.bottom+10;if(y+th>window.innerHeight-8)y=Math.max(8,r.top-th-10);tipEl.style.left=x+'px';tipEl.style.top=y+'px';}
+function hideTip(){tipEl.style.display='none';}
+stats.addEventListener('mouseover',e=>{const tile=e.target.closest('.stat[data-info]');if(tile)showTip(tile);else hideTip();});stats.addEventListener('mouseleave',hideTip);stats.addEventListener('click',e=>{const tile=e.target.closest('.stat[data-info]');if(tile&&tipEl.style.display!=='block')showTip(tile);else hideTip();});window.addEventListener('scroll',hideTip,{passive:true});function clearChart(){if(chart){chart.destroy();chart=null;}
+chartWrap.style.display='none';legend.style.display='none';stats.innerHTML='';foot.textContent='';lastData=null;lastKind=null;hideTip();}
+function setMode(m){if(mode===m)return;mode=m;const simple=m==='simple';$('#mode-simple').classList.toggle('on',simple);$('#mode-complex').classList.toggle('on',!simple);$('#mode-simple').setAttribute('aria-checked',simple);$('#mode-complex').setAttribute('aria-checked',!simple);$('#catField').style.display=simple?'none':'flex';$('#companyField').style.display=simple?'flex':'none';$('#evtField').style.display=simple?'none':'flex';$('#evtCountField').style.display=simple?'none':'flex';$('#trendField').style.display=simple?'none':'flex';$('#suscPanel').style.display=simple?'none':'';clearChart();setMsg(simple?'Pick a company and click Forecast — linear and polynomial trend lines are fitted to exactly the interval you select.':'Pick an industry and click Forecast to see its equal-weighted index history and the model\'s prediction of the next 4-week average, with a confidence band.');if(simple&&!companiesLoaded){loadCompanies();}}
+$('#mode-simple').addEventListener('click',()=>setMode('simple'));$('#mode-complex').addEventListener('click',()=>setMode('complex'));function setMsg(t,err=false){stopLoader();msg.textContent=t;msg.className=err?'err':'';msg.style.display=t?'block':'none';}
+function fmt(n){return n==null?'—':n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function polyfit(ys,deg){const m=ys.length,nx=i=>(m>1?(2*i/(m-1)-1):0);const A=Array.from({length:deg+1},()=>new Array(deg+2).fill(0));for(let i=0;i<m;i++){const x=nx(i),pw=[1];for(let p=1;p<=2*deg;p++)pw.push(pw[p-1]*x);for(let r=0;r<=deg;r++){for(let c=0;c<=deg;c++)A[r][c]+=pw[r+c];A[r][deg+1]+=pw[r]*ys[i];}}
+for(let col=0;col<=deg;col++){let piv=col;for(let r=col+1;r<=deg;r++)if(Math.abs(A[r][col])>Math.abs(A[piv][col]))piv=r;[A[col],A[piv]]=[A[piv],A[col]];if(Math.abs(A[col][col])<1e-12)return null;for(let r=0;r<=deg;r++){if(r===col)continue;const f=A[r][col]/A[col][col];for(let c=col;c<=deg+1;c++)A[r][c]-=f*A[col][c];}}
+const cf=A.map((row,r)=>row[deg+1]/A[r][r]);return i=>{const x=nx(i);let v=0,xp=1;for(const c of cf){v+=c*xp;xp*=x;}return v;};}
+const LOADER_WORDS=['Marinating','Cooking','Thinking','Simmering','Crunching','Pondering','Brewing','Percolating','Fusing events','Divining','Forecasting','Computing','Contemplating','Noodling','Conjuring'];let loaderTimer=null;function startLoader(){msg.className='';msg.style.display='block';let i=Math.floor(Math.random()*LOADER_WORDS.length);const paint=()=>{const w=LOADER_WORDS[i++%LOADER_WORDS.length];msg.innerHTML='<span class="loader"><span class="spin"></span>'
++'<span class="loader-word">'+w+'<span class="loader-dots"></span></span></span>';};paint();loaderTimer=setInterval(paint,1500);}
+function stopLoader(){if(loaderTimer){clearInterval(loaderTimer);loaderTimer=null;}}
+function setCompaniesLoading(on){combo.classList.toggle('loading',on);companyInput.disabled=on;goBtn.disabled=on;companyInput.placeholder=on?'Loading companies…':'Search by name, ticker, or CIK…';}
+async function loadCompanies(){setCompaniesLoading(true);startLoader();try{const r=await fetch('/api/forecast/companies?limit=1000');if(r.status===401){location.href='/login';return;}
+const d=await r.json();if(!r.ok)throw new Error(d.error||'Failed to load companies');companies=(d.companies||[]).map(c=>{const name=(c.name||'').trim(),ticker=(c.ticker||'').trim();const display=name||ticker||c.cik;return{cik:c.cik,name,ticker,display,search:[name,ticker,c.cik].join(' ').toLowerCase()};});companiesLoaded=true;setMsg('Loaded '+companies.length+' companies. Search by name, ticker, or CIK — or click the field to browse.');}catch(e){setMsg('Could not load company list: '+e.message,true);}
+finally{setCompaniesLoading(false);}}
+async function loadScenarioOptions(){const sel=$('#evtType');try{const r=await fetch('/api/forecast/options');if(r.status===401){return;}
+const d=await r.json();if(!r.ok)throw new Error(d.error||'options failed');(d.event_types||[]).forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;sel.appendChild(o);});}catch(e){}}
+const suscCache={};const suscList=$('#suscList'),suscMsg=$('#suscMsg');let suscToken=0;function setSuscMsg(t,err=false){suscMsg.innerHTML=t;suscMsg.className=err?'err':'';suscMsg.style.display=t?'block':'none';}
+function markSuscActive(){suscList.querySelectorAll('.susc-row').forEach(b=>b.classList.toggle('on',b.dataset.label===catSel.value));}
+function renderSusceptibility(industries){suscList.innerHTML=industries.map((x,i)=>{const pct=x.susceptibility_pct==null?0:x.susceptibility_pct;return'<li><button type="button" class="susc-row" data-label="'+esc(x.label)+'">'
++'<span class="susc-top"><span class="susc-rank">'+(i+1)+'</span>'
++'<span class="susc-name">'+esc(x.label)+'</span>'
++'<span class="susc-pct">'+pct.toFixed(0)+'</span></span>'
++'<span class="susc-bar"><i style="width:'+pct.toFixed(1)+'%"></i></span>'
++'<span class="susc-meta">'+x.members.toLocaleString()+' companies · '
++x.event_count.toLocaleString()+' filings</span>'
++'</button></li>';}).join('');suscList.hidden=false;markSuscActive();}
+async function loadSusceptibility(){const evt=$('#evtType').value;const token=++suscToken;if(!evt){suscList.hidden=true;suscList.innerHTML='';setSuscMsg('Pick an <b>8-K event scenario</b> to rank all 46 industries by susceptibility to it.');return;}
+if(suscCache[evt]){setSuscMsg('');renderSusceptibility(suscCache[evt]);return;}
+suscList.hidden=true;setSuscMsg('Scoring 46 industries against <b>'+esc(evt)+'</b>…');try{const r=await fetch('/api/forecast/susceptibility?event_type='+encodeURIComponent(evt));if(r.status===401){location.href='/login';return;}
+const d=await r.json();if(token!==suscToken)return;if(!r.ok)throw new Error(d.error||('HTTP '+r.status));const inds=d.industries||[];if(!inds.length){setSuscMsg('No industries scored for this event type.');return;}
+suscCache[evt]=inds;setSuscMsg('');renderSusceptibility(inds);}catch(e){if(token!==suscToken)return;setSuscMsg('Susceptibility unavailable — '+esc(e.message),true);}}
+suscList.addEventListener('click',e=>{const b=e.target.closest('.susc-row');if(!b)return;catSel.value=b.dataset.label;markSuscActive();runForecast();});async function loadCategories(){try{const r=await fetch('/api/forecast/categories');if(r.status===401){location.href='/login';return;}
+const d=await r.json();if(!r.ok)throw new Error(d.error||'Failed to load industries');avgWindow=d.avg_window||20;catSel.innerHTML='';(d.categories||[]).forEach(c=>{const o=document.createElement('option');o.value=c.label;o.textContent=c.label+' — '+c.members.toLocaleString()+' companies';catSel.appendChild(o);});if(!catSel.options.length){catSel.innerHTML='<option value="">No industries available</option>';}}catch(e){catSel.innerHTML='<option value="">Industries unavailable — '+e.message+'</option>';setMsg('Industry model unavailable: '+e.message+' — Simple mode still works.',true);}}
+function esc(s){return s.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));}
+function highlight(text,q){const t=esc(text);if(!q)return t;const i=text.toLowerCase().indexOf(q);if(i<0)return t;return esc(text.slice(0,i))+'<mark>'+esc(text.slice(i,i+q.length))+'</mark>'+esc(text.slice(i+q.length));}
+function renderMenu(){const q=companyInput.value.trim().toLowerCase();filtered=(q?companies.filter(c=>c.search.includes(q)):companies).slice(0,300);activeIdx=-1;if(!filtered.length){menu.innerHTML='<div class="combo-empty">No companies match “'+esc(companyInput.value)+'”</div>';return;}
+menu.innerHTML=filtered.map((c,idx)=>'<div class="combo-opt" role="option" data-idx="'+idx+'">'+'<span class="nm">'+highlight(c.display,q)+'</span>'+'<span class="ck">'+highlight(c.cik,q)+'</span></div>').join('');menu.querySelectorAll('.combo-opt').forEach(el=>{el.addEventListener('mousedown',ev=>{ev.preventDefault();selectCompany(filtered[+el.dataset.idx]);});});}
+function openMenu(){menu.classList.add('open');companyInput.setAttribute('aria-expanded','true');}
+function closeMenu(){menu.classList.remove('open');companyInput.setAttribute('aria-expanded','false');activeIdx=-1;}
+function setActive(delta){if(!filtered.length)return;activeIdx=(activeIdx+delta+filtered.length)%filtered.length;const opts=menu.querySelectorAll('.combo-opt');opts.forEach((el,i)=>el.classList.toggle('active',i===activeIdx));const cur=opts[activeIdx];if(cur)cur.scrollIntoView({block:'nearest'});}
+function selectCompany(c){if(!c)return;selectedCik=c.cik;companyInput.value=c.display+' ('+c.cik+')';closeMenu();}
+function resolveCik(){if(selectedCik)return selectedCik;const v=companyInput.value.trim();const m=v.match(/\((\d{6,10})\)\s*$/);if(m)return m[1];if(/^\d{6,10}$/.test(v))return v;const lv=v.toLowerCase();const hit=companies.find(c=>c.display.toLowerCase()===lv||(c.ticker&&c.ticker.toLowerCase()===lv)||c.cik===v);return hit?hit.cik:(v||null);}
+async function runForecast(){const hist=Math.min(Math.max(parseInt(historyInput.value||'180',10),40),1000);let url;if(mode==='simple'){const cik=resolveCik();if(!cik){setMsg('Please choose a company first.',true);return;}
+url='/api/forecast?mode=simple&cik='+encodeURIComponent(cik)+'&history='+hist;}else{const cat=catSel.value;if(!cat){setMsg('Please choose an industry first.',true);return;}
+url='/api/forecast?mode=complex&category='+encodeURIComponent(cat)+'&history='+hist;const evt=$('#evtType').value;if(evt){url+='&event_type='+encodeURIComponent(evt)
++'&event_count='+encodeURIComponent($('#evtCount').value||'1');}}
+goBtn.disabled=true;startLoader();stats.innerHTML='';chartWrap.style.display='none';legend.style.display='none';foot.textContent='';try{const r=await fetch(url);if(r.status===401){location.href='/login';return;}
+const d=await r.json();if(!r.ok)throw new Error(d.error||('HTTP '+r.status));if(mode==='simple'){render(d);}else{renderCategory(d);}}catch(e){setMsg('Forecast failed: '+e.message,true);}
+finally{goBtn.disabled=false;}}
+function renderCategory(d){setMsg('');lastData=d;lastKind='category';const hist=d.history||[],fc=d.forecast||[];if(!fc.length){setMsg('Model returned no forecast for this industry.',true);return;}
+const labels=hist.map(h=>h.date).concat(fc.map(f=>f.date));const n=hist.length;const histVals=hist.map(h=>h.value).concat(fc.map(()=>null));const lastVal=hist.length?hist[n-1].value:null;const seg=key=>{const out=new Array(labels.length).fill(null);fc.forEach((f,i)=>{out[n+i]=f[key];});return out;};const trail=new Array(labels.length).fill(null);for(let i=Math.max(0,n-avgWindow);i<n;i++)trail[i]=d.trailing_avg;const evByDate={};(d.events||[]).forEach(e=>{evByDate[e.date]=e;});const evtBars=labels.map((dt,i)=>i<n?(evByDate[dt]?evByDate[dt].count:null):null);const evtMax=Math.max(1,...(d.events||[]).map(e=>e.count));const p=d.pct_vs_trailing||{};const dir=(p.median??0)>=0?'up':'down';const rng=` [${fmtPct(p.lower)} … ${fmtPct(p.upper)}]`;stats.innerHTML=`<div class="stat" data-info="industry"><span class="k">Industry</span><span class="v" style="font-size:16px">${d.label}</span></div>`+`<div class="stat" data-info="members"><span class="k">Member companies</span><span class="v">${(d.members||0).toLocaleString()}</span></div>`+`<div class="stat" data-info="index"><span class="k">Index · ${d.last_date}</span><span class="v">${fmt(lastVal)}</span></div>`+`<div class="stat" data-info="next4w"><span class="k">Next 4-wk avg vs trailing</span><span class="v ${dir}">${fmtPct(p.median)}</span></div>`+`<div class="stat" data-info="band"><span class="k">P10 … P90</span><span class="v" style="font-size:15px">${rng.trim()}</span></div>`;if(d.test_metrics&&d.test_metrics.dir_acc!=null){stats.innerHTML+=`<div class="stat" data-info="diracc"><span class="k">Held-out direction accuracy</span><span class="v" style="font-size:15px">${(d.test_metrics.dir_acc*100).toFixed(1)}%</span></div>`;}
+const dv=d.significance&&d.significance.divergence;if(dv&&dv.paired_drift&&dv.car&&dv.car.p!=null){const cum=dv.paired_drift.cum_divergence_pct,pCar=dv.car.p;const sigYes=pCar<0.05;const cls=sigYes?(cum>=0?'up':'down'):'';stats.innerHTML+=`<div class="stat" data-info="sig"><span class="k">Δ vs market (${dv.window.event_days}d) · significance</span>`+`<span class="v ${cls}" style="font-size:15px">${fmtPct(cum)} <small style="opacity:.75">· ${fmtP(pCar)}${sigYes?' ✓':''}</small></span></div>`;}
+if(d.scenario&&d.scenario.pct_vs_trailing){const sp=d.scenario.pct_vs_trailing,dd=d.scenario.delta_median_pp;const sdir=(sp.median??0)>=0?'up':'down';stats.innerHTML+=`<div class="stat" data-info="scenario_ind"><span class="k">If “${d.scenario.event_type}” ×${d.scenario.count} today</span>`+`<span class="v ${sdir}" style="font-size:15px">${fmtPct(sp.median)} <small style="color:#2dd4bf">(Δ ${(dd>=0?'+':'')+dd.toFixed(2)} pp)</small></span></div>`;}
+const datasets=[{label:'Industry index',data:histVals,borderColor:'#58a6ff',backgroundColor:'#58a6ff',borderWidth:2,pointRadius:0,tension:.15,spanGaps:false},{label:'Trailing 4-wk avg',data:trail,borderColor:'#8b9bb0',borderWidth:1.5,borderDash:[2,3],pointRadius:0,spanGaps:false},{label:'Predicted next 4-wk avg',data:seg('median'),borderColor:'#b98fff',borderWidth:2.5,borderDash:[6,4],pointRadius:0,spanGaps:false},{label:'P90',data:seg('upper'),borderColor:'rgba(185,143,255,0)',backgroundColor:'rgba(185,143,255,.20)',borderWidth:0,pointRadius:0,fill:'+1',spanGaps:false},{label:'P10',data:seg('lower'),borderColor:'rgba(185,143,255,0)',borderWidth:0,pointRadius:0,fill:false,spanGaps:false},{label:'8-K filings',type:'bar',data:evtBars,yAxisID:'y2',_evt:true,backgroundColor:'rgba(255,166,87,.34)',hoverBackgroundColor:'rgba(255,166,87,.6)',borderWidth:0,barPercentage:1.0,categoryPercentage:1.0,order:10},];const scn=d.scenario;if(scn&&scn.forecast&&scn.forecast.length){const smed=new Array(labels.length).fill(null);scn.forecast.forEach((f,i)=>{smed[n+i]=f.median;});datasets.splice(3,0,{label:'Scenario ('+scn.event_type+')',data:smed,borderColor:'#2dd4bf',borderWidth:2.5,borderDash:[2,3],pointRadius:0,spanGaps:false});}
+const showLin=$('#chkLin').checked,showPoly=$('#chkPoly').checked;const yHist=hist.map(h=>h.value);let polyDeg=0;if(showLin){const f=polyfit(yHist,1);if(f)datasets.push({label:'Linear trend',data:labels.map((_,i)=>f(i)),borderColor:'#f778ba',borderWidth:1.8,borderDash:[8,5],pointRadius:0});}
+if(showPoly){polyDeg=n>=120?3:2;const f=polyfit(yHist,polyDeg);if(f)datasets.push({label:`Polynomial trend (deg ${polyDeg})`,data:labels.map((_,i)=>f(i)),borderColor:'#3fb950',borderWidth:1.8,borderDash:[3,4],pointRadius:0});}
+$('#legend-hist-txt').textContent='Industry index (equal-weighted, rebased to 100)';$('#legend-fc-txt').textContent='Predicted next 4-week average (median)';$('#legend-trail').style.display='inline';$('#legend-poly').style.display='none';$('#legend-band').style.display='inline';$('#legend-evt').style.display='inline';$('#legend-scn').style.display=scn?'inline':'none';if(scn)$('#legend-scn-txt').textContent=`Scenario · ${scn.count} × “${scn.event_type}” filed today`;$('#legend-lin-cat').style.display=showLin?'inline':'none';$('#legend-poly-cat').style.display=showPoly?'inline':'none';if(showPoly)$('#legend-poly-cat-txt').textContent=`Polynomial trend (deg ${polyDeg}, fit + extrapolation)`;if(legendMkt)legendMkt.style.display='none';const cs=getComputedStyle(document.documentElement);const tickColor=(cs.getPropertyValue('--text3').trim()||'#607d96');const gridColor=(cs.getPropertyValue('--grid').trim()||'rgba(88,166,255,.06)');const opts={responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{color:tickColor,maxTicksLimit:12,autoSkip:true},grid:{color:gridColor}},y:{ticks:{color:tickColor},grid:{color:gridColor}},y2:{position:'right',beginAtZero:true,suggestedMax:evtMax*4,grid:{display:false},ticks:{color:'rgba(255,166,87,.7)',precision:0,maxTicksLimit:4},title:{display:true,text:'8-K filings / day',color:'rgba(255,166,87,.7)',font:{size:10}}},},plugins:{legend:{display:false},tooltip:{filter:i=>i.dataset.label!=='P10'&&!(i.dataset._evt&&!i.parsed.y),callbacks:{label:i=>{const v=i.parsed.y;if(v==null)return null;if(i.dataset._evt)return`8-K filings (members): ${v}`;return`${i.dataset.label}: ${fmt(v)}`;},afterLabel:i=>{if(!i.dataset._evt)return null;const e=evByDate[i.label];if(!e||!e.types||!e.types.length)return null;return e.types.slice(0,6).map(t=>`   ${t.type}: ${t.count}`);}}},},};if(chart)chart.destroy();chartWrap.style.display='block';legend.style.display='flex';chart=new Chart($('#chart'),{type:'line',data:{labels,datasets},options:opts});const acc=d.test_metrics&&d.test_metrics.dir_acc!=null?` · this industry's held-out (2024→2026) direction accuracy: ${(d.test_metrics.dir_acc*100).toFixed(1)}% over ${d.test_metrics.n} windows`:'';const nEvt=(d.events||[]).reduce((a,e)=>a+e.count,0);const scnTxt=scn?` Teal = the same forecast if ${scn.count} × “${scn.event_type}” were filed by member`
++` companies on the anchor day — injected into the encoder exactly as real filings enter it;`
++` the teal-vs-purple gap is the model's estimated event impact (Δ ${(scn.delta_median_pp>=0?'+':'')+scn.delta_median_pp.toFixed(2)} pp).`:'';let sigTxt='';if(dv&&dv.paired_drift){const pd_=dv.paired_drift,car=dv.car||{},pl=dv.placebo||{};sigTxt=` · Significance of the last ${dv.window.event_days} trading days vs the market (all classified companies excl. this industry):`
++` paired drift t-test ${fmtP(pd_.p)}, Wilcoxon ${fmtP(pd_.p_wilcoxon)},`
++(car.p!=null?` β-adjusted event study CAR ${fmtPct(car.car_pct)} ${fmtP(car.p)} (β=${(car.beta??0).toFixed(2)}),`:'')
++(pl.p_drift!=null?` placebo vs ${(pl.n_draws||0).toLocaleString()} random same-size baskets ${fmtP(pl.p_drift)}.`:'.');}
+const skill=d.significance&&d.significance.model_skill;const skillTxt=skill&&skill.dm_zero_p!=null?` · This industry's model error edge vs always-flat on held-out data: Diebold–Mariano ${fmtP(skill.dm_zero_p)} (FDR q=${skill.dm_zero_q!=null?skill.dm_zero_q.toFixed(3):'—'}${skill.significant?', significant at q<0.05':''}).`:'';foot.textContent=`The model predicts ONE number: the industry index's next ${fc.length}-trading-day average`
++` vs its trailing ${avgWindow}-day average (purple vs grey) — shown as a flat segment with its P10–P90 band.`
++scnTxt
++` Amber bars = daily 8-K filings by member companies (${nEvt.toLocaleString()} in this window) — these counts,`
++` total and per item type, are encoder inputs, so the forecast is conditioned on this event activity.`
++` Index = equal-weighted daily returns of ${(d.members||0).toLocaleString()} member companies, ${d.anchor_note}.`
++acc+sigTxt+skillTxt;}
+function fmtPct(v){return v==null?'—':(v>=0?'+':'')+v.toFixed(2)+'%';}
+function fmtP(p){return(p==null||!isFinite(p))?'p —':(p<0.001?'p <0.001':'p '+p.toFixed(3));}
+function render(d){setMsg('');lastData=d;lastKind='simple';const hist=d.history||[],fc=d.forecast||[];if(!fc.length){setMsg('Model returned no forecast for this company.',true);return;}
+const labels=hist.map(h=>h.date).concat(fc.map(f=>f.date));const n=hist.length;const histClose=hist.map(h=>h.close).concat(fc.map(()=>null));const pad=(arr,key)=>{const out=new Array(labels.length).fill(null);if(n)out[n-1]=d.last_close;fc.forEach((f,i)=>{out[n+i]=f[key];});return out;};const lo=pad(fc,'lower'),up=pad(fc,'upper');const scn=d.scenario||null;const lin=(d.model&&d.model.kind==='linreg')?d.model:null;const med=(lin&&d.trend&&d.trend.length===n)?d.trend.map(t=>t.value).concat(fc.map(f=>f.median)):pad(fc,'median');const polyLine=(lin&&d.poly_trend&&d.poly_trend.length===n&&d.poly_forecast)?d.poly_trend.map(t=>t.value).concat(d.poly_forecast.map(f=>f.value)):null;const ch=((d.forecast[fc.length-1].median-d.last_close)/d.last_close)*100;const dir=ch>=0?'up':'down';stats.innerHTML=`<div class="stat" data-info="company"><span class="k">${d.name||d.cik}</span><span class="v">${d.ticker||('CIK '+d.cik)}</span></div>`+`<div class="stat" data-info="lastclose"><span class="k">Last close · ${d.last_date}</span><span class="v">$${fmt(d.last_close)}</span></div>`+`<div class="stat" data-info="fcmedian"><span class="k">Forecast (${fc.length}d) median</span><span class="v">$${fmt(d.forecast[fc.length-1].median)}</span></div>`+`<div class="stat" data-info="projchange"><span class="k">Projected change</span><span class="v ${dir}">${ch>=0?'+':''}${ch.toFixed(2)}%</span></div>`+`<div class="stat" data-info="modelkind"><span class="k">Model</span><span class="v" style="font-size:14px">${lin ? 'Simple · Linear + poly trend' : 'Complex · Event-aware'}</span></div>`;if(scn){const sd=scn.delta_vs_baseline_pct,sdir=sd>=0?'up':'down';stats.innerHTML+=`<div class="stat" data-info="scenario_lbl"><span class="k">Scenario</span><span class="v" style="color:#2dd4bf;font-size:14px">${scn.label}</span></div>`+`<div class="stat" data-info="scenario_delta"><span class="k">Scenario vs baseline</span><span class="v ${sdir}">${sd>=0?'+':''}${sd.toFixed(2)}%</span></div>`;}
+const mkt=d.market||[];const marketData=new Array(labels.length).fill(null);const marketPct=new Array(labels.length).fill(null);if(mkt.length&&hist.length){const mmap=new Map(mkt.map(m=>[m.date,m.value]));let base=null;for(let i=0;i<hist.length;i++){const v=mmap.get(hist[i].date);if(v!=null){base=v;break;}}
+if(base){const c0=hist[0].close;for(let i=0;i<hist.length;i++){const v=mmap.get(hist[i].date);if(v!=null){marketData[i]=c0*v/base;marketPct[i]=(v/base-1)*100;}}}}
+const hasMarket=marketData.some(v=>v!=null);const datasets=[{label:'Market',data:marketData,borderColor:'#8b9bb0',backgroundColor:'#8b9bb0',borderWidth:1.5,borderDash:[2,3],pointRadius:0,tension:.15,spanGaps:true,_raw:marketPct},{label:'Historical',data:histClose,borderColor:'#58a6ff',backgroundColor:'#58a6ff',borderWidth:2,pointRadius:0,tension:.15,spanGaps:false},{label:(lin?'Linear trend':'Forecast'),data:med,borderColor:'#b98fff',borderWidth:2,borderDash:[6,4],pointRadius:0,tension:(lin?0:.15),spanGaps:true},];if(!lin){datasets.push({label:'P90',data:up,borderColor:'rgba(185,143,255,0)',backgroundColor:'rgba(185,143,255,.20)',borderWidth:0,pointRadius:0,fill:'+1',tension:.15,spanGaps:true},{label:'P10',data:lo,borderColor:'rgba(185,143,255,0)',borderWidth:0,pointRadius:0,fill:false,tension:.15,spanGaps:true});}
+if(polyLine){datasets.push({label:`Polynomial trend (deg ${lin.poly_degree})`,data:polyLine,borderColor:'#ffa657',borderWidth:2,borderDash:[2,3],pointRadius:0,tension:.2,spanGaps:true});}
+if(scn&&scn.forecast){const smed=pad(scn.forecast,'median');datasets.push({label:'Scenario',data:smed,borderColor:'#2dd4bf',borderWidth:2.5,pointRadius:0,tension:.15,spanGaps:true});}
+const data={labels,datasets};if(legendMkt)legendMkt.style.display=hasMarket?'inline':'none';$('#legend-hist-txt').textContent='Historical close';const legFcTxt=$('#legend-fc-txt');if(legFcTxt)legFcTxt.textContent=lin?'Linear trend (fit + extrapolation)':'Forecast (median)';const legTrail=$('#legend-trail');if(legTrail)legTrail.style.display='none';const legPoly=$('#legend-poly');if(legPoly)legPoly.style.display=polyLine?'inline':'none';const legBand=$('#legend-band');if(legBand)legBand.style.display=lin?'none':'inline';const legEvt=$('#legend-evt');if(legEvt)legEvt.style.display='none';const legScn=$('#legend-scn');if(legScn)legScn.style.display='none';$('#legend-lin-cat').style.display='none';$('#legend-poly-cat').style.display='none';const cs=getComputedStyle(document.documentElement);const tickColor=(cs.getPropertyValue('--text3').trim()||'#607d96');const gridColor=(cs.getPropertyValue('--grid').trim()||'rgba(88,166,255,.06)');const opts={responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},scales:{x:{ticks:{color:tickColor,maxTicksLimit:12,autoSkip:true},grid:{color:gridColor}},y:{ticks:{color:tickColor,callback:v=>'$'+v},grid:{color:gridColor}},},plugins:{legend:{display:false},tooltip:{filter:i=>i.dataset.label!=='P10',callbacks:{label:i=>{const v=i.parsed.y;if(v==null)return null;const ds=i.dataset;if(ds._raw){const p=ds._raw[i.dataIndex];return`${ds.label}: $${fmt(v)}`+(p==null?'':` (${p>=0?'+':''}${p.toFixed(1)}% vs start)`);}
+return`${ds.label}: $${fmt(v)}`;}}},},};if(chart)chart.destroy();chartWrap.style.display='block';legend.style.display='flex';chart=new Chart($('#chart'),{type:'line',data,options:opts});if(lin){const slope=lin.slope_per_day,r2=lin.r2;foot.textContent=`Simple mode: ordinary least-squares linear regression fitted on the fly to the selected interval (${lin.fit_points} closes) · slope ${slope>=0?'+':''}${slope.toFixed(3)} $/trading day · R² ${r2.toFixed(3)}`
++(polyLine?` · amber curve = degree-${lin.poly_degree} polynomial fit (R² ${lin.poly_r2.toFixed(3)})`:'')
++` · both lines are fitted on past days and extended ${fc.length} trading days ahead · no confidence band — OLS intervals assume independent residuals, which daily prices violate · no event conditioning.`;}else{foot.textContent=`Quantiles ${JSON.stringify(d.quantiles)} · forecast horizon ${fc.length} trading days · band = P10–P90 of the model's predictive distribution.`
++(hasMarket?` · Market baseline = equal-weighted index of interquartile-mean daily returns across all stocks, rebased to the stock's starting price.`:'')
++(scn?` · scenario conditions on "${scn.label}" occurring on the latest day (encoder injection).`:'');}}
+function setThemeGlyph(){const t=document.documentElement.getAttribute('data-theme');const b=$('#theme-btn');if(b)b.textContent=(t==='dark')?'☀️':'🌙';}
+function toggleTheme(){const next=(document.documentElement.getAttribute('data-theme')==='dark')?'light':'dark';document.documentElement.setAttribute('data-theme',next);localStorage.setItem('sec-theme',next);setThemeGlyph();if(lastData){if(lastKind==='category'){renderCategory(lastData);}else{render(lastData);}}}
+setThemeGlyph();function openHelp(){document.getElementById('help-overlay').classList.add('on');}
+function closeHelp(){document.getElementById('help-overlay').classList.remove('on');}
+function openInfo(){document.getElementById('info-overlay').classList.add('on');}
+function closeInfo(){document.getElementById('info-overlay').classList.remove('on');}
+function toggleMax(id){document.getElementById(id).classList.toggle('max');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeHelp();closeInfo();}});function exportPDF(){if(!lastData){alert('Run a forecast first, then export it as PDF.');return;}
+const ph=document.getElementById('print-head');const nm=lastKind==='category'?(lastData.label+' industry'):(lastData.name||lastData.ticker||('CIK '+lastData.cik));if(ph)ph.querySelector('.pt-meta').textContent=nm+' · exported '+new Date().toLocaleString();const prev=document.title;document.title='MarketLattice-forecast-'+(lastKind==='category'?lastData.label:(lastData.ticker||lastData.cik));const restore=()=>{document.title=prev;window.removeEventListener('afterprint',restore);};window.addEventListener('afterprint',restore);window.print();setTimeout(restore,4000);}
+goBtn.addEventListener('click',runForecast);companyInput.addEventListener('focus',()=>{renderMenu();openMenu();});companyInput.addEventListener('input',()=>{selectedCik=null;renderMenu();openMenu();});companyInput.addEventListener('keydown',e=>{const open=menu.classList.contains('open');if(e.key==='ArrowDown'){e.preventDefault();if(!open){renderMenu();openMenu();}setActive(1);}
+else if(e.key==='ArrowUp'){e.preventDefault();setActive(-1);}
+else if(e.key==='Enter'){if(open&&activeIdx>=0&&filtered[activeIdx]){e.preventDefault();selectCompany(filtered[activeIdx]);}
+else{closeMenu();runForecast();}}
+else if(e.key==='Escape'){closeMenu();}});$('.combo-caret').addEventListener('mousedown',e=>{e.preventDefault();if(combo.classList.contains('loading'))return;if(menu.classList.contains('open')){closeMenu();}
+else{companyInput.focus();renderMenu();openMenu();}});document.addEventListener('click',e=>{if(!combo.contains(e.target))closeMenu();});catSel.addEventListener('keydown',e=>{if(e.key==='Enter')runForecast();});['chkLin','chkPoly'].forEach(id=>$('#'+id).addEventListener('change',()=>{if(lastKind==='category'&&lastData)renderCategory(lastData);}));$('#evtType').addEventListener('change',loadSusceptibility);catSel.addEventListener('change',markSuscActive);loadCategories();loadScenarioOptions();</script>
+<script>window.ML_PAGE_CONTEXT=function(){const lines=['Forecast tab. Mode: '+mode
++' (complex = trained FF48 industry TFT model; simple = per-company trend '
++'regression fitted on the fly).'];if(selectedCik)lines.push('Selected company CIK: '+selectedCik+'.');if(!lastData){lines.push('No forecast has been rendered yet.');}else{lines.push('A '+(lastKind||'forecast')+' forecast is currently rendered. Fields:');Object.keys(lastData).slice(0,30).forEach(k=>{const v=lastData[k];if(v==null)return;if(Array.isArray(v))lines.push('- '+k+': ['+v.length+' values]');else if(typeof v==='object')
+lines.push('- '+k+': '+JSON.stringify(v).slice(0,300));else lines.push('- '+k+': '+v);});}
+return{page:'Forecast',summary:lines.join('\n')};};</script>
+</body>
+</html>
