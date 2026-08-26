@@ -65,9 +65,6 @@ button:disabled{opacity:.55;cursor:default}
 .tab:hover{color:var(--text)}
 .tab.active{background:var(--bg3);color:var(--text)}
 .tab.active.dev{background:var(--bg3);color:var(--purple)}
-.devnote{display:none;font-size:13px;color:var(--text2);background:var(--bg2);
-  border:1px solid var(--border2);border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.55}
-body.dev .devnote{display:block}
 body.dev .logo{background:var(--purple)}
 </style>
 <script src="/config.js"></script>
@@ -85,7 +82,6 @@ body.dev .logo{background:var(--purple)}
       <div class="tab active" id="tab-user" onclick="setMode('user')">Standard</div>
       <div class="tab" id="tab-dev" onclick="setMode('dev')">Developer</div>
     </div>
-    <div class="devnote"><strong>Developer Mode</strong> &mdash; an isolated, general-purpose coding assistant. No MarketLattice data, prompts, or context is loaded.</div>
     <form method="POST" action="/login" autocomplete="off">
       <div class="fld">
         <label for="username">User ID</label>
@@ -103,7 +99,7 @@ body.dev .logo{background:var(--purple)}
 function toggleTheme(){const next=(document.documentElement.getAttribute('data-theme')==='dark')?'light':'dark';document.documentElement.setAttribute('data-theme',next);localStorage.setItem('sec-theme',next);setThemeGlyph();}
 setThemeGlyph();function setMode(mode){const dev=mode==='dev';document.body.classList.toggle('dev',dev);document.getElementById('tab-user').classList.toggle('active',!dev);const td=document.getElementById('tab-dev');td.classList.toggle('active',dev);td.classList.toggle('dev',dev);const u=document.getElementById('username');if(dev)u.value='ml-dev';else if(u.value==='ml-dev')u.value='';document.getElementById('submit-btn').innerHTML=dev?'Enter Developer Mode':'Sign in';document.getElementById('password').focus();}</script>
 
-<script>document.querySelector('form').addEventListener('submit',async function(ev){ev.preventDefault();var btn=document.getElementById('submit-btn');var err=document.querySelector('.err');btn.disabled=true;err.textContent='';try{var resp=await fetch('/login',{method:'POST',headers:{'Accept':'application/json'},body:new URLSearchParams(new FormData(ev.target)),});var data=await resp.json().catch(function(){return{};});if(resp.ok&&data.token){localStorage.setItem('ml_session_token',data.token);location.href='/';return;}
+<script>document.querySelector('form').addEventListener('submit',async function(ev){ev.preventDefault();var btn=document.getElementById('submit-btn');var err=document.querySelector('.err');btn.disabled=true;err.textContent='';try{var resp=await fetch('/login',{method:'POST',headers:{'Accept':'application/json'},body:new URLSearchParams(new FormData(ev.target)),});var data=await resp.json().catch(function(){return{};});if(resp.ok&&data.token){localStorage.setItem('ml_session_token',data.token);location.href=data.must_change?'/settings':'/';return;}
 err.textContent=data.error||('Sign-in failed (HTTP '+resp.status+').');}catch(e){err.textContent='Could not reach the backend at '+window.ML_API_BASE
 +' — '+e.message;}
 btn.disabled=false;});</script>

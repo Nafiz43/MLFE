@@ -83,7 +83,7 @@ tr.hit td.h{color:var(--green)}tr.miss td.h{color:var(--red)}
 <script src="/config.js"></script>
 
 <style>html{visibility:hidden}</style>
-<script>(function(){var DEV_ONLY=['nav-bench','nav-feedback'];var DATA_ONLY=['nav-planner'];fetch('/api/status').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){var dev=d&&d.mode==='developer';(dev?DATA_ONLY:DEV_ONLY).forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});document.documentElement.style.visibility='visible';}).catch(function(){location.replace('/login.html');});})();</script>
+<script>(function(){var DEV_ONLY=['nav-bench','nav-feedback','nav-accounts'];var DATA_ONLY=['nav-planner'];fetch('/api/status').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){if(d&&d.must_change&&location.pathname.indexOf('/settings')!==0){location.replace('/settings');return;}var dev=d&&d.mode==='developer';(dev?DATA_ONLY:DEV_ONLY).forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});document.documentElement.style.visibility='visible';}).catch(function(){location.replace('/login.html');});})();</script>
 
 <style>
 
@@ -295,6 +295,14 @@ body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
       <button class="ms-item" type="button" id="ms-feedback-btn" role="menuitem">
         <svg width="16" height="16" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v4M12 14h.01"/></svg>
         <span class="lbl">Send feedback</span></button>
+      <a class="ms-item" id="nav-settings" href="/settings" role="menuitem"
+         title="Your display name and password">
+        <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <span class="lbl">Settings</span></a>
+      <a class="ms-item" id="nav-accounts" href="/accounts" role="menuitem" 
+         title="Create, reset and remove user accounts">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+        <span class="lbl">Accounts</span></a>
       <a class="ms-item" id="nav-logout" href="/logout" role="menuitem">
         <svg width="16" height="16" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
         <span class="lbl">Sign out</span></a>

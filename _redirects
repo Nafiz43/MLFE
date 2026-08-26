@@ -6,4 +6,6 @@
 /forecast  /forecast.html  200
 /planner  /planner.html  200
 /trades  /trades.html  200
+/settings  /settings.html  200
+/accounts  /accounts.html  200
 /*  /login.html  200
