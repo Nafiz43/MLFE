@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MarketLattice · Event Analysis</title>
+<title>Feedback · Developer Portal</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2358a6ff'/><stop offset='1' stop-color='%23b98fff'/></linearGradient></defs><rect width='32' height='32' rx='7' fill='url(%23g)'/><path d='M16 7L25 24L7 24Z' fill='%23fff'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('sec-theme')||'dark');</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -17,9 +17,8 @@
   --accent:#58a6ff;--accent2:#2c6dd4;--accent-dim:rgba(88,166,255,.14);
   --green:#3ecf72;--red:#f5504a;--amber:#e0a940;--purple:#b98fff;
   --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
-  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --sans:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter','Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   --r:10px;
-  --grid:rgba(88,166,255,.06);--bar:rgba(88,166,255,.45);--bar-on:#58a6ff;
 }
 [data-theme="light"]{
   --bg:#f4f6fb;--bg2:#ffffff;--bg3:#eaeff8;--bg4:#dde4f0;
@@ -27,74 +26,47 @@
   --text:#111927;--text2:#354d66;--text3:#6a84a0;
   --accent:#2563eb;--accent2:#1d4ed8;--accent-dim:rgba(37,99,235,.1);
   --green:#16a34a;--red:#dc2626;--amber:#b45309;--purple:#7c3aed;
-  --grid:rgba(37,99,235,.09);--bar:rgba(37,99,235,.35);--bar-on:#2563eb;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
-body{display:flex;flex-direction:column;min-height:100vh}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:var(--accent);text-decoration:none}
 #hdr{height:54px;display:flex;align-items:center;gap:12px;padding:0 18px;background:var(--bg3);
   border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:10}
-.hdr-brand{display:flex;align-items:center;gap:10px}
 .hdr-icon{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--purple));
   display:flex;align-items:center;justify-content:center;font-size:15px}
-.hdr-title{font-weight:800;letter-spacing:-.02em;color:var(--text)}
+.hdr-title{font-weight:800;letter-spacing:-.02em}
 .hdr-title span{color:var(--accent)}
+.hdr-brand{display:flex;align-items:center;gap:12px;color:inherit}
+.hdr-brand:hover{opacity:.75}
 .hdr-sub{color:var(--text3);font-size:12px;border-left:1px solid var(--border2);padding-left:12px}
 .hdr-spacer{flex:1}
-.hdr-link{font-size:13px;color:var(--text2);padding:6px 12px;border:1px solid var(--border2);border-radius:7px;
-  background:transparent;cursor:pointer;font-family:var(--sans)}
-.hdr-link:hover{color:var(--text);border-color:var(--accent)}
-main{flex:1;max-width:1280px;width:100%;margin:0 auto;padding:24px 18px 48px}
-.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;background:var(--bg2);
-  border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px}
-.field{display:flex;flex-direction:column;gap:5px}
-.field label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-weight:600}
-input{background:var(--bg);border:1px solid var(--border2);color:var(--text);border-radius:7px;
-  padding:9px 11px;font-family:var(--sans);font-size:14px;outline:none}
-input:focus{border-color:var(--accent)}
-#windowDays{width:100px}
-#endDate{width:150px}
-button.go{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:10px 20px;font-weight:600;
-  font-size:14px;cursor:pointer;font-family:var(--sans)}
-button.go:hover{background:var(--accent2)}
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:18px}
-.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-weight:700;margin-bottom:14px}
-#barWrap{position:relative;height:220px}
-#msg{color:var(--text2);padding:8px 4px}
-#msg.err{color:var(--red)}
-.split{display:flex;gap:18px;flex-wrap:wrap}
-.split>.card{flex:1;min-width:300px}
-#breakdownCard{flex:0 1 290px;min-width:240px}
-#impactCard{flex:1.45 1 430px}
-#industryCard{flex:1 1 340px}
-.daybar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
-.daybar .date{font-family:var(--mono);font-size:16px;font-weight:700}
-.daybar .n{color:var(--text3);font-size:12px}
-.futctl{display:flex;gap:6px;flex-wrap:wrap}
-.futctl button{background:var(--bg);border:1px solid var(--border2);color:var(--text2);border-radius:7px;
-  padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
-.futctl button.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
-.tw{overflow-x:auto}
-
-#impactTable th,#indTable th,#impactTable td,#indTable td{padding:6px 5px;white-space:nowrap}
-#impactTable td.name,#indTable td.name{max-width:150px}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.04em;
-  padding:6px 8px;border-bottom:1px solid var(--border2);white-space:nowrap}
-td{padding:7px 8px;border-bottom:1px solid var(--border);font-family:var(--mono)}
-td.name{font-family:var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
-.up{color:var(--green)} .down{color:var(--red)}
-.empty{color:var(--text3);padding:20px 4px;text-align:center}
-.bd-row{display:grid;grid-template-columns:1fr auto;gap:5px 10px;padding:9px 0;border-bottom:1px solid var(--border)}
-.bd-row:last-child{border-bottom:none}
-.bd-name{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px;color:var(--text)}
-.bd-code{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-dim);
-  border-radius:4px;padding:2px 6px;flex:none}
-.bd-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bd-num{font-family:var(--mono);font-size:12px;color:var(--text2);white-space:nowrap;flex:none}
-.bd-bar{grid-column:1/-1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
-.bd-bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px}
-.foot{color:var(--text3);font-size:12px;margin-top:10px}
+main{max-width:1240px;width:100%;margin:0 auto;padding:24px 18px 60px}
+h2{font-size:16px;margin:0 0 4px}
+.sub{color:var(--text3);font-size:12.5px;margin-bottom:14px}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.chip{font-size:12.5px;padding:5px 11px;border:1px solid var(--border2);border-radius:20px;
+  background:var(--bg2);color:var(--text2);cursor:pointer}
+.chip:hover{color:var(--text);border-color:var(--accent)}
+.chip.on{background:var(--accent-dim);border-color:var(--accent);color:var(--text)}
+.count{color:var(--text3);font-size:12.5px;margin-left:auto}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);font-weight:600;
+  text-align:left;padding:9px 12px;border-bottom:1px solid var(--border2);white-space:nowrap;background:var(--bg3)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr.row:hover{background:var(--bg3)}
+.mono{font-family:var(--mono);font-size:12px;color:var(--text2);white-space:nowrap}
+.who{font-weight:700;white-space:nowrap}
+.tag{display:inline-block;font-size:11px;padding:1px 8px;border-radius:20px;background:var(--bg4);color:var(--text2)}
+.tag.good{background:rgba(62,207,114,.16);color:var(--green)}
+.tag.bad{background:rgba(245,80,74,.16);color:var(--red)}
+.fb{max-width:520px;white-space:pre-wrap}
+.more{font-size:11.5px;color:var(--text3);cursor:pointer;user-select:none}
+.more:hover{color:var(--accent)}
+.detail td{background:var(--bg3);font-size:12.5px;color:var(--text2)}
+.detail .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:2px}
+.detail pre{white-space:pre-wrap;font-family:var(--mono);font-size:12px;margin-bottom:10px}
+.empty{padding:34px;text-align:center;color:var(--text3);font-size:13.5px}
 </style>
 <script src="/config.js"></script>
 
@@ -107,12 +79,12 @@ td.name{font-family:var(--sans);white-space:nowrap;overflow:hidden;text-overflow
 </style>
 </head>
 <body>
-<header id="hdr">
-  <a class="hdr-brand" href="/" title="Back to MarketLattice home">
+<div id="hdr">
+  <a class="hdr-brand" href="/">
     <div class="hdr-icon">📈</div>
     <div class="hdr-title">Market<span>Lattice</span></div>
   </a>
-  <div class="hdr-sub">Event Analysis</div>
+  <div class="hdr-sub">Developer Portal · User Feedback</div>
   <div class="hdr-spacer"></div>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
@@ -421,10 +393,6 @@ var d=await r.json().catch(function(){return{};});if(!r.ok)throw new Error(d.err
 .mlchat-m.bot{align-self:flex-start;background:var(--bg,#111);color:var(--text,#eee);
   border:1px solid var(--border2,#333);border-bottom-left-radius:3px;
   border-left:3px solid var(--accent,#4f7cff)}
-
-.mlchat-m .ml-pos{color:var(--green,#3ecf72);font-weight:600}
-.mlchat-m .ml-neg{color:var(--red,#f5504a);font-weight:600}
-.mlchat-m .ml-warn{color:var(--amber,#e0a940);font-weight:600}
 .mlchat-m.bot strong{font-weight:700}
 .mlchat-m.err{align-self:flex-start;background:transparent;border:0;
   color:var(--red,#e06c75);font-size:12px}
@@ -464,128 +432,42 @@ var d=await r.json().catch(function(){return{};});if(!r.ok)throw new Error(d.err
 <script>var MlChat=(function(){var noop={open:function(){},close:function(){}};if(location.pathname==='/'){var fab0=document.getElementById('mlchatFab');var panel0=document.getElementById('mlchatPanel');if(fab0)fab0.style.display='none';if(panel0)panel0.style.display='none';return noop;}
 var history=[],busy=false,greeted=false;function el(id){return document.getElementById(id);}
 function ctx(){var c=(typeof window.ML_PAGE_CONTEXT==='function')?window.ML_PAGE_CONTEXT():window.ML_PAGE_CONTEXT;if(c&&c.page)return c;return{page:document.title||'MarketLattice',summary:'No page-specific data exposed.'};}
-function add(cls,text,html){var m=document.createElement('div');m.className='mlchat-m '+cls;if(html)m.innerHTML=html;else m.textContent=text;var box=el('mlchatMsgs');box.appendChild(m);box.scrollTop=box.scrollHeight;return m;}
+function add(cls,text){var m=document.createElement('div');m.className='mlchat-m '+cls;m.textContent=text;var box=el('mlchatMsgs');box.appendChild(m);box.scrollTop=box.scrollHeight;return m;}
 function open(){el('mlchatPanel').classList.add('open');el('mlchatPage').textContent='· '+ctx().page;if(!greeted){greeted=true;add('bot','Hi! I can answer questions about the '+ctx().page
 +' screen — the numbers, charts, and what they mean.');}
 setTimeout(function(){el('mlchatText').focus();},50);}
 function close(){el('mlchatPanel').classList.remove('open');}
 async function send(){if(busy)return;var q=el('mlchatText').value.trim();if(!q)return;busy=true;el('mlchatText').value='';el('mlchatSend').disabled=true;add('user',q);var typing=document.createElement('div');typing.className='mlchat-typing';typing.textContent='thinking…';el('mlchatMsgs').appendChild(typing);el('mlchatMsgs').scrollTop=el('mlchatMsgs').scrollHeight;try{var r=await fetch('/api/screen-chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,history:history.slice(-10),model:localStorage['sec-model']||'',context:ctx()})});if(r.status===401){location.href='/login';return;}
-var d=await r.json();typing.remove();if(!r.ok){add('err',d.error||('HTTP '+r.status));}else{add('bot',d.answer||'(empty answer)',d.answer_html);history.push({role:'user',content:q},{role:'assistant',content:d.answer||''});}}catch(e){typing.remove();add('err','Request failed: '+e.message);}finally{busy=false;el('mlchatSend').disabled=false;el('mlchatText').focus();}}
+var d=await r.json();typing.remove();if(!r.ok){add('err',d.error||('HTTP '+r.status));}else{add('bot',d.answer||'(empty answer)');history.push({role:'user',content:q},{role:'assistant',content:d.answer||''});}}catch(e){typing.remove();add('err','Request failed: '+e.message);}finally{busy=false;el('mlchatSend').disabled=false;el('mlchatText').focus();}}
 function init(){el('mlchatFab').addEventListener('click',function(){el('mlchatPanel').classList.contains('open')?close():open();});el('mlchatClose').addEventListener('click',close);el('mlchatSend').addEventListener('click',send);el('mlchatText').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}});document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});}
 if(document.readyState==='loading')
 document.addEventListener('DOMContentLoaded',init);else init();return{open:open,close:close};})();</script>
 
-</header>
-
+</div>
 <main>
-  <div class="controls">
-    <div class="field">
-      <label for="windowDays">Window (days)</label>
-      <input id="windowDays" type="number" min="20" max="1000" value="180">
-    </div>
-    <div class="field">
-      <label for="endDate">Up to date (optional)</label>
-      <input id="endDate" type="date">
-    </div>
-    <button class="go" id="go">Load</button>
-  </div>
-
-  <div class="card">
-    <h2>8-K filings per date — click a bar to inspect impact</h2>
-    <div id="msg">Loading…</div>
-    <div id="barWrap" style="display:none"><canvas id="barChart"></canvas></div>
-  </div>
-
-  <div class="split">
-    <div class="card" id="breakdownCard" style="display:none">
-      <h2>8-K event types filed this day</h2>
-      <div class="daybar">
-        <div>
-          <div class="date" id="bdDate">—</div>
-          <div class="n" id="bdTotals"></div>
-        </div>
-      </div>
-      <div id="bdMsg" class="empty" style="display:none"></div>
-      <div id="bdList"></div>
-      <div class="foot" id="bdFoot"></div>
-    </div>
-
-    <div class="card" id="impactCard" style="display:none">
-      <h2>Most impacted companies</h2>
-      <div class="daybar">
-        <div>
-          <div class="date" id="selDate">—</div>
-          <div class="n" id="selFilers"></div>
-        </div>
-        <div class="futctl" id="futctl">
-          <span class="n" style="align-self:center;margin-right:4px">Days ahead:</span>
-          <button data-n="1">1d</button>
-          <button data-n="5" class="active">5d</button>
-          <button data-n="10">10d</button>
-          <button data-n="21">21d</button>
-          <button data-n="63">63d</button>
-        </div>
-      </div>
-      <div id="impactMsg" class="empty" style="display:none"></div>
-      <div class="tw"><table id="impactTable" style="display:none">
-        <thead><tr><th>Company</th><th>Price</th><th>Industry</th><th>Abnormal Δ</th><th>p-value</th></tr></thead>
-        <tbody id="impactBody"></tbody>
-      </table></div>
-      <div class="foot" id="impactFoot"></div>
-    </div>
-
-    <div class="card" id="industryCard" style="display:none">
-      <h2>Most impacted industries</h2>
-      <div class="daybar">
-        <div>
-          <div class="date" id="indDate">—</div>
-          <div class="n" id="indSub"></div>
-        </div>
-      </div>
-      <div id="indMsg" class="empty" style="display:none"></div>
-      <div class="tw"><table id="indTable" style="display:none">
-        <thead><tr><th>Industry</th><th>Index</th><th>Market</th>
-          <th>Abnormal Δ</th><th>p-value</th></tr></thead>
-        <tbody id="indBody"></tbody>
-      </table></div>
-      <div class="foot" id="indFoot"></div>
-    </div>
-  </div>
+  <h2>User feedback</h2>
+  <div class="sub">Everything submitted from the chat and from every other screen, newest first.</div>
+  <div class="bar" id="bar"></div>
+  <div class="card"><table>
+    <thead><tr><th>When</th><th>User</th><th>Where</th><th>Feedback</th><th></th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
 </main>
-
-<script>const $=s=>document.querySelector(s);const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();const windowDays=$('#windowDays'),endDate=$('#endDate'),goBtn=$('#go'),msg=$('#msg'),barWrap=$('#barWrap'),impactCard=$('#impactCard'),selDate=$('#selDate'),selFilers=$('#selFilers'),impactMsg=$('#impactMsg'),impactTable=$('#impactTable'),impactBody=$('#impactBody'),impactFoot=$('#impactFoot'),futctl=$('#futctl');const breakdownCard=$('#breakdownCard'),bdDate=$('#bdDate'),bdTotals=$('#bdTotals'),bdMsg=$('#bdMsg'),bdList=$('#bdList'),bdFoot=$('#bdFoot');const industryCard=$('#industryCard'),indDate=$('#indDate'),indSub=$('#indSub'),indMsg=$('#indMsg'),indTable=$('#indTable'),indBody=$('#indBody'),indFoot=$('#indFoot');const fmtLvl=n=>n==null?'—':n.toFixed(2);const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let barChart=null,currentDate=null,currentFuture=5,lastBreakdown=null,lastImpact=null;function setMsg(t,err=false){msg.textContent=t;msg.className=err?'err':'';msg.style.display=t?'block':'none';}
-function fmtPct(n){return n==null?'—':(n>=0?'+':'')+n.toFixed(2)+'%';}
-function fmtP(n){return n==null||isNaN(n)?'—':n.toFixed(3);}
-async function loadCounts(){const days=Math.min(Math.max(parseInt(windowDays.value||'180',10),20),1000);const end=endDate.value||'';setMsg('Loading 8-K filing calendar…');barWrap.style.display='none';impactCard.style.display='none';breakdownCard.style.display='none';industryCard.style.display='none';try{let url='/api/events/daily_counts?days='+days;if(end)url+='&end='+encodeURIComponent(end);const r=await fetch(url);if(r.status===401){location.href='/login';return;}
-const d=await r.json();if(!r.ok)throw new Error(d.error||('HTTP '+r.status));renderBars(d.counts||[]);}catch(e){setMsg('Failed to load: '+e.message,true);}}
-function renderBars(counts){if(!counts.length){setMsg('No 8-K filings found in this window.',true);return;}
-setMsg('');barWrap.style.display='block';const labels=counts.map(c=>c.date);const data=counts.map(c=>c.count);if(barChart)barChart.destroy();barChart=new Chart($('#barChart'),{type:'bar',data:{labels,datasets:[{label:'# 8-K filings',data,backgroundColor:labels.map(d=>d===currentDate?cssVar('--bar-on'):cssVar('--bar')),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,animation:false,scales:{x:{ticks:{color:cssVar('--text3'),maxTicksLimit:14,autoSkip:true},grid:{display:false}},y:{ticks:{color:cssVar('--text3'),precision:0},grid:{color:cssVar('--grid')}},},plugins:{legend:{display:false}},onClick:(evt,els)=>{if(!els.length)return;const i=els[0].index;selectDate(labels[i],data[i]);},},});}
-function selectDate(date,count){currentDate=date;impactCard.style.display='block';breakdownCard.style.display='block';industryCard.style.display='block';selDate.textContent=date;selFilers.textContent=count+' 8-K item'+(count===1?'':'s')+' filed this day';if(barChart){barChart.data.datasets[0].backgroundColor=barChart.data.labels.map(d=>d===currentDate?cssVar('--bar-on'):cssVar('--bar'));barChart.update();}
-loadBreakdown();loadImpact();}
-async function loadBreakdown(){if(!currentDate)return;bdDate.textContent=currentDate;bdList.innerHTML='';bdTotals.textContent='';bdFoot.textContent='';bdMsg.style.display='block';bdMsg.textContent='Loading event types\u2026';try{const r=await fetch('/api/events/breakdown?date='+encodeURIComponent(currentDate));if(r.status===401){location.href='/login';return;}
-const d=await r.json();if(!r.ok)throw new Error(d.error||('HTTP '+r.status));renderBreakdown(d);}catch(e){bdMsg.style.display='block';bdMsg.textContent='Failed: '+e.message;}}
-function renderBreakdown(d){lastBreakdown=d;const items=d.items||[];bdDate.textContent=d.date;if(!items.length){bdMsg.style.display='block';bdMsg.textContent='No 8-K items recorded for this date.';return;}
-bdMsg.style.display='none';const co=d.companies+' compan'+(d.companies===1?'y':'ies');const it=d.total+' item'+(d.total===1?'':'s');bdTotals.textContent=it+' \u00b7 '+co;selFilers.textContent=it+' from '+co;const max=Math.max.apply(null,items.map(i=>i.count))||1;bdList.innerHTML=items.map(i=>'<div class="bd-row">'+'<div class="bd-name">'+'<span class="bd-code">'+esc(i.item_code)+'</span>'+'<span class="bd-label" title="'+esc(i.event_type)+'">'+esc(i.event_type)+'</span>'+'</div>'+'<div class="bd-num">'+i.count+' \u00b7 '+i.pct.toFixed(1)+'%</div>'+'<div class="bd-bar"><i style="width:'+(100*i.count/max).toFixed(1)+'%"></i></div>'+'</div>').join('');bdFoot.textContent='Counts are 8-K items, so they sum to the bar height; one filing can carry '
-+'several items, which is why the item total exceeds the company count.';}
-async function loadImpact(){if(!currentDate)return;impactTable.style.display='none';impactMsg.style.display='block';impactMsg.textContent='Computing beta-adjusted impact…';impactFoot.textContent='';indTable.style.display='none';indMsg.style.display='block';indMsg.textContent='Computing beta-adjusted impact…';indDate.textContent=currentDate;indSub.textContent='';indFoot.textContent='';try{const r=await fetch('/api/events/impact?date='+encodeURIComponent(currentDate)+'&future='+currentFuture);if(r.status===401){location.href='/login';return;}
-const d=await r.json();if(!r.ok)throw new Error(d.error||('HTTP '+r.status));renderImpact(d);}catch(e){impactMsg.textContent='Failed: '+e.message;indMsg.textContent='Failed: '+e.message;}}
-function renderImpact(d){lastImpact=d;const rows=d.companies||[];if(!rows.length){impactMsg.style.display='block';impactMsg.textContent='No companies with enough price history around this date.';return;}
-impactMsg.style.display='none';impactTable.style.display='table';const mkt=fmtLvl(d.market_level);impactBody.innerHTML=rows.map(c=>{const dir=c.delta_pct>=0?'up':'down';const sig=c.p!=null&&c.p<0.05?' ✓':'';const px=c.price==null?'—':'$'+c.price.toFixed(2);const ind=c.industry?`title="${esc(c.industry)} industry index"`:'';return`<tr><td class="name">${esc(c.name || c.cik)}</td><td>${px}</td>`+`<td ${ind}>${fmtLvl(c.industry_level)}</td>`+`<td class="${dir}">${fmtPct(c.delta_pct)}</td><td>${fmtP(c.p)}${sig}</td></tr>`;}).join('');impactFoot.textContent=`Price is the traded close on ${d.date}; Industry is that filer's FF48 industry index (market = ${mkt}), both rebased to 100 at the start of the ${d.estimation_days}-day estimation window. Abnormal Δ is the CAR vs the market's own beta-implied move over ${d.future_days} trading day(s) starting ${d.date}. ✓ marks p < 0.05.`;renderIndustries(d);}
-function renderIndustries(d){const rows=d.industries||[];indDate.textContent=d.date;if(!rows.length){indMsg.style.display='block';indMsg.textContent='No industries with enough price history around this date.';return;}
-indMsg.style.display='none';indTable.style.display='table';const filers=rows.reduce((a,r)=>a+r.filers,0);indSub.textContent=rows.length+' industr'+(rows.length===1?'y':'ies')
-+' \u00b7 '+filers+' filer'+(filers===1?'':'s');const mkt=fmtLvl(d.market_level);indBody.innerHTML=rows.map(r=>{const dir=r.delta_pct>=0?'up':'down';const sig=r.p!=null&&r.p<0.05?' ✓':'';const title=`${r.filers} of ${r.members} members filed an 8-K this day`;return`<tr><td class="name" title="${esc(title)}">${esc(r.label)}</td>`+`<td>${fmtLvl(r.level)}</td><td>${mkt}</td>`+`<td class="${dir}">${fmtPct(r.delta_pct)}</td><td>${fmtP(r.p)}${sig}</td></tr>`;}).join('');indFoot.textContent=`Equal-weighted FF48 industry indices — the same construction the forecaster uses — rebased to 100 alongside the market at the start of the ${d.estimation_days}-day estimation window, then run through the identical event study. Hover an industry for its filer count. ✓ marks p < 0.05.`;}
-futctl.addEventListener('click',e=>{const btn=e.target.closest('button[data-n]');if(!btn)return;futctl.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentFuture=parseInt(btn.dataset.n,10);loadImpact();});function applyChartTheme(){if(!barChart)return;barChart.options.scales.x.ticks.color=cssVar('--text3');barChart.options.scales.y.ticks.color=cssVar('--text3');barChart.options.scales.y.grid.color=cssVar('--grid');barChart.data.datasets[0].backgroundColor=barChart.data.labels.map(d=>d===currentDate?cssVar('--bar-on'):cssVar('--bar'));barChart.update();}
-function setThemeGlyph(){const t=document.documentElement.getAttribute('data-theme');const b=document.getElementById('theme-btn');if(b)b.textContent=(t==='dark')?'☀️':'🌙';}
-function toggleTheme(){const next=(document.documentElement.getAttribute('data-theme')==='dark')?'light':'dark';document.documentElement.setAttribute('data-theme',next);localStorage.setItem('sec-theme',next);setThemeGlyph();applyChartTheme();}
-setThemeGlyph();goBtn.addEventListener('click',loadCounts);loadCounts();</script>
-<script>window.ML_PAGE_CONTEXT=function(){const lines=['8-K Event Analysis tab. Selected filing date: '
-+(currentDate||'none')+', impact window: '+currentFuture+' trading days.'];const b=lastBreakdown;if(b&&b.total){lines.push('On '+b.date+': '+b.total+' 8-K items from '+b.companies
-+' companies. Top item types: '
-+(b.items||[]).slice(0,6).map(i=>i.item_code+' '+i.event_type
-+' ('+i.count+')').join('; ')+'.');}else lines.push('No 8-K breakdown loaded for the selected date (or none filed).');const im=lastImpact;if(im&&(im.companies||[]).length){lines.push('Beta-adjusted abnormal move over the impact window (top rows): '
-+im.companies.slice(0,8).map(c=>(c.name||c.cik)+' '
-+(c.delta_pct>=0?'+':'')+Number(c.delta_pct).toFixed(2)+'%'
-+(c.p!=null&&c.p<0.05?' (p<0.05)':'')).join('; ')+'.');}
-return{page:'Event Analysis (8-K filings)',summary:lines.join('\n')};};</script>
+<script>let ROWS=[],who='';const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));const when=ts=>new Date(ts*1000).toLocaleString([],{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit'});const tone=f=>{const t=(f||'').trim().toLowerCase();return t==='good'?'good':t==='bad'?'bad':'';};function render(){const rows=who?ROWS.filter(r=>(r.user||'')===who):ROWS;const tb=document.getElementById('rows');if(!rows.length){tb.innerHTML='<tr><td colspan="5" class="empty">No feedback yet.</td></tr>';return;}
+tb.innerHTML=rows.map(r=>{const where=r.page?esc(r.page):'chat';const has=r.question||r.response||r.context;return`<tr class="row">
+      <td class="mono">${when(r.ts)}</td>
+      <td class="who">${esc(r.user || '—')}</td>
+      <td><span class="tag">${where}</span></td>
+      <td class="fb"><span class="tag ${tone(r.feedback)}">${esc(r.feedback)}</span></td>
+      <td>${has ? `<span class="more"data-id="${r.id}">details</span>` : ''}</td>
+    </tr>
+    <tr class="detail" id="d${r.id}" style="display:none"><td colspan="5">
+      ${r.question ? `<div class="lbl">Question</div><pre>${esc(r.question)}</pre>` : ''}
+      ${r.response ? `<div class="lbl">Answer</div><pre>${esc(r.response)}</pre>` : ''}
+      ${r.context ? `<div class="lbl">Page context</div><pre>${esc(r.context)}</pre>` : ''}
+      <div class="mono">${esc(r.model || '')} ${esc(r.job_id || '')}</div>
+    </td></tr>`;}).join('');tb.querySelectorAll('.more').forEach(el=>el.onclick=()=>{const d=document.getElementById('d'+el.dataset.id);const open=d.style.display!=='none';d.style.display=open?'none':'';el.textContent=open?'details':'hide';});}
+function bar(){const users=[...new Set(ROWS.map(r=>r.user||'—'))].sort();const b=document.getElementById('bar');b.innerHTML=[['','Everyone'],...users.map(u=>[u,u])].map(([v,l])=>`<span class="chip${v === who ? ' on' : ''}" data-u="${esc(v)}">${esc(l)}</span>`).join('')+`<span class="count">${ROWS.length} submissions from ${users.length} user(s)</span>`;b.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{who=c.dataset.u;bar();render();});}
+fetch('/api/feedback',{headers:{'Accept':'application/json'}}).then(r=>r.ok?r.json():Promise.reject(r.status)).then(d=>{ROWS=d.rows||[];bar();render();}).catch(e=>{document.getElementById('rows').innerHTML=`<tr><td colspan="5" class="empty">Could not load feedback (${esc(e)}).</td></tr>`;});</script>
 </body>
 </html>
