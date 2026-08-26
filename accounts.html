@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Accounts · Developer Portal</title>
+<title>Accounts · Administration</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2358a6ff'/><stop offset='1' stop-color='%23b98fff'/></linearGradient></defs><rect width='32' height='32' rx='7' fill='url(%23g)'/><path d='M16 7L25 24L7 24Z' fill='%23fff'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -115,7 +115,7 @@ var dev=d&&d.mode==='developer';(dev?DATA_ONLY:DEV_ONLY).forEach(function(id){va
     <div class="hdr-icon">📈</div>
     <div class="hdr-title">Market<span>Lattice</span></div>
   </a>
-  <div class="hdr-sub">Developer Portal · Accounts</div>
+  <div class="hdr-sub">Administration · Accounts</div>
   <div class="hdr-spacer"></div>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
@@ -291,6 +291,10 @@ body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
        title="What every user submitted as feedback">
       <svg width="16" height="16" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.9A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/></svg>
       <span class="lbl">Feedback</span></a>
+    <a class="ms-item" id="nav-accounts" href="/accounts" data-path="/accounts" 
+       title="Create, reset and remove user accounts">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+      <span class="lbl">Accounts</span></a>
     <a class="ms-item" id="nav-accuracy" href="/accuracy" data-path="/accuracy"
        title="Measured end-to-end accuracy of the planner pipeline">
       <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
@@ -319,10 +323,6 @@ body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
          title="Your display name and password">
         <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
         <span class="lbl">Settings</span></a>
-      <a class="ms-item" id="nav-accounts" href="/accounts" role="menuitem" 
-         title="Create, reset and remove user accounts">
-        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
-        <span class="lbl">Accounts</span></a>
       <a class="ms-item" id="nav-logout" href="/logout" role="menuitem">
         <svg width="16" height="16" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
         <span class="lbl">Sign out</span></a>
@@ -519,7 +519,7 @@ document.addEventListener('DOMContentLoaded',init);else init();return{open:open,
 <script>let ME='';const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));const when=ts=>new Date(ts*1000).toLocaleDateString([],{year:'numeric',month:'short',day:'2-digit'});function show(id,text,ok){const el=document.getElementById(id);el.className='msg '+(ok?'ok':'err');el.textContent=text;}
 function reveal(who,pw){document.getElementById('secret-who').textContent=who;document.getElementById('secret-pw').textContent=pw;document.getElementById('secret').style.display='block';}
 async function load(){const s=await fetch('/api/status').then(r=>r.json()).catch(()=>({}));ME=s.user||'';const r=await fetch('/api/accounts',{headers:{'Accept':'application/json'}});if(!r.ok){location.href='/';return;}
-const rows=(await r.json()).accounts||[];document.getElementById('rows').innerHTML=rows.map(a=>{const self=a.username===ME;return'<tr class="row">'+'<td class="mono">'+esc(a.username)+(self?' <span class="you">(you)</span>':'')+'</td>'+'<td>'+esc(a.name)+'</td>'+'<td><span class="tag">'+(a.is_dev?'developer':'standard')+'</span></td>'+'<td>'+(a.must_change?'<span class="tag bad">must change</span>':'<span class="tag good">set by user</span>')+'</td>'+'<td class="mono">'+when(a.created)+'</td>'+'<td style="white-space:nowrap">'+'<button class="ghost" onclick="resetPassword(\''+esc(a.username)+'\')">Reset password</button> '+
+const rows=(await r.json()).accounts||[];document.getElementById('rows').innerHTML=rows.map(a=>{const self=a.username===ME;return'<tr class="row">'+'<td class="mono">'+esc(a.username)+(self?' <span class="you">(you)</span>':'')+'</td>'+'<td>'+esc(a.name)+'</td>'+'<td><span class="tag">'+(a.is_dev?'admin':'standard')+'</span></td>'+'<td>'+(a.must_change?'<span class="tag bad">must change</span>':'<span class="tag good">set by user</span>')+'</td>'+'<td class="mono">'+when(a.created)+'</td>'+'<td style="white-space:nowrap">'+'<button class="ghost" onclick="resetPassword(\''+esc(a.username)+'\')">Reset password</button> '+
 (self?'':'<button class="ghost danger" onclick="removeAccount(\''+esc(a.username)+'\')">Delete</button>')+'</td></tr>';}).join('')||'<tr><td colspan="6" class="empty">No accounts yet</td></tr>';}
 async function send(method,body,qs){const r=await fetch('/api/accounts'+(qs||''),{method:method,headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,});return[r.ok,await r.json().catch(()=>({}))];}
 async function createAccount(){const u=document.getElementById('nu').value.trim();const n=document.getElementById('nn').value.trim();if(!u)return show('new-msg','A user ID is required.',false);const[ok,d]=await send('POST',{username:u,name:n});if(!ok)return show('new-msg',d.error||'Could not create the account.',false);show('new-msg','Account created.',true);document.getElementById('nu').value='';document.getElementById('nn').value='';reveal(d.account.username,d.password);load();}
