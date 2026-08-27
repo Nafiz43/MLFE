@@ -107,11 +107,15 @@ tr:last-child td{border-bottom:none}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text2);margin:8px 2px}
 .legend span{display:flex;align-items:center;gap:5px}
 .empty{padding:40px;text-align:center;color:var(--text3)}
-</style>
+.ml-pos{color:var(--green,#3ecf72);font-weight:600}
+.mlchat-m .ml-neg{color:var(--red,#f5504a);font-weight:600}
+.mlchat-m .ml-warn{color:var(--amber,#e0a940);font-weight:600}</style>
 <script src="/config.js"></script>
 
 <style>html{visibility:hidden}</style>
-<script>(function(){var DEV_ONLY=['nav-bench','nav-feedback','nav-accounts','nav-box'];var DATA_ONLY=['nav-new','nav-chat','nav-forecast','nav-planner','nav-events','nav-trades'];var ADMIN_OK=/^\/(accounts|box|benchmark|feedback|accuracy|settings)/;fetch('/api/status').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){if(d&&d.must_change&&location.pathname.indexOf('/settings')!==0){location.replace('/settings');return;}var dev=d&&d.mode==='developer';if(dev&&!ADMIN_OK.test(location.pathname)){location.replace('/accounts');return;}(dev?DATA_ONLY:DEV_ONLY).forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});document.documentElement.style.visibility='visible';}).catch(function(){location.replace('/login.html');});})();</script>
+<script>(function(){var DEV_ONLY=['nav-bench','nav-feedback','nav-accounts','nav-box'];var DATA_ONLY=['nav-new','nav-chat','nav-forecast','nav-planner','nav-events','nav-trades'];var ADMIN_OK=/^\/(accounts|box|benchmark|feedback|accuracy|settings)/;fetch('/api/status').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){if(d&&d.must_change&&location.pathname.indexOf('/settings')!==0){location.replace('/settings');return;}
+var dev=d&&d.mode==='developer';if(dev&&!ADMIN_OK.test(location.pathname)){location.replace('/accounts');return;}
+(dev?DATA_ONLY:DEV_ONLY).forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});document.documentElement.style.visibility='visible';}).catch(function(){location.replace('/login.html');});})();</script>
 
 <style>
 
@@ -259,6 +263,17 @@ body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
   body.ms-open #ms-scrim{display:block}
   #topbar,#hdr{padding-left:52px}
 }
+.ml-pager{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin:10px 0 4px;font-size:12.5px;color:var(--text3)}
+.ml-pager select{background:var(--bg2);color:var(--text2);border:1px solid var(--border2);
+  border-radius:7px;padding:4px 8px;font-size:12.5px;font-family:inherit;cursor:pointer}
+.ml-pager select:focus{outline:none;border-color:var(--accent)}
+.ml-pager .ml-pgap{flex:1}
+.ml-pager button{background:var(--bg2);border:1px solid var(--border2);color:var(--text2);
+  border-radius:7px;padding:4px 10px;font-size:12.5px;cursor:pointer;font-family:inherit}
+.ml-pager button:hover:not(:disabled){border-color:var(--accent);color:var(--text)}
+.ml-pager button:disabled{opacity:.4;cursor:default}
+.ml-pager .ml-pnum{min-width:74px;text-align:center}
 </style>
 
 <div id="ms-scrim" hidden-role="backdrop"></div>
@@ -270,13 +285,13 @@ body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
   <div class="ms-top"><a class="ms-brand" href="/">MarketLattice</a></div>
 
   <nav class="ms-nav">
-    <a class="ms-item" id="nav-new" href="/" title="Start a new conversation">
+    <a class="ms-item" id="nav-new" href="/"  title="Start a new conversation">
       <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
       <span class="lbl">New</span></a>
-    <a class="ms-item" id="nav-chat" href="/" data-path="/" title="Chat">
+    <a class="ms-item" id="nav-chat" href="/" data-path="/"  title="Chat">
       <svg width="16" height="16" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span class="lbl">Chat</span></a>
-    <a class="ms-item" id="nav-forecast" href="/forecast" data-path="/forecast"
+    <a class="ms-item" id="nav-forecast" href="/forecast" data-path="/forecast" 
        title="Event-aware stock price forecasts">
       <svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-5 3 3 5-7"/></svg>
       <span class="lbl">Forecast</span></a>
@@ -284,11 +299,11 @@ body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
        title="Turn an amount and a horizon into a modelled allocation">
       <svg width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
       <span class="lbl">Planner</span></a>
-    <a class="ms-item" id="nav-events" href="/events" data-path="/events"
+    <a class="ms-item" id="nav-events" href="/events" data-path="/events" 
        title="8-K filing calendar and per-company event impact">
       <svg width="16" height="16" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
       <span class="lbl">Event Analysis</span></a>
-    <a class="ms-item" id="nav-trades" href="/trades" data-path="/trades"
+    <a class="ms-item" id="nav-trades" href="/trades" data-path="/trades" 
        title="Publicly disclosed insider trades">
       <svg width="16" height="16" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
       <span class="lbl">Trades</span></a>
@@ -304,7 +319,11 @@ body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
        title="Create, reset and remove user accounts">
       <svg width="16" height="16" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
       <span class="lbl">Accounts</span></a>
-    <a class="ms-item" id="nav-box" href="/box" data-path="/box" title="Unix logins on the machine MarketLattice runs on"><svg width="16" height="16" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h.01M11 8h6"/></svg><span class="lbl">Box Users</span></a><a class="ms-item" id="nav-accuracy" href="/accuracy" data-path="/accuracy"
+    <a class="ms-item" id="nav-box" href="/box" data-path="/box" 
+       title="Unix logins on the machine MarketLattice runs on">
+      <svg width="16" height="16" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h.01M11 8h6"/></svg>
+      <span class="lbl">Box Users</span></a>
+    <a class="ms-item" id="nav-accuracy" href="/accuracy" data-path="/accuracy"
        title="Measured end-to-end accuracy of the planner pipeline">
       <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
       <span class="lbl">Accuracy</span></a>
@@ -349,7 +368,16 @@ body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
   </div>
 </aside>
 
-<script>(function(){var side=document.getElementById('mlside');document.querySelectorAll('.ms-nav a[data-path]').forEach(function(a){if(a.dataset.path===location.pathname)a.classList.add('active');});fetch('/api/status').then(function(r){return r.json();}).then(function(d){if(!d||!d.user)return;document.getElementById('ms-name').textContent=d.user;var parts=String(d.user).replace(/[._-]+/g,' ').trim().split(/\s+/);var ini=parts.length>1?parts[0][0]+parts[parts.length-1][0]:parts[0].slice(0,2);document.getElementById('ms-av').textContent=ini;}).catch(function(){});var menu=document.getElementById('ms-menu');var acct=document.getElementById('ms-acct');function setOpen(open){menu.classList.toggle('open',open);acct.setAttribute('aria-expanded',open?'true':'false');}
+<script>window.mlPaginate=(function(){var SIZES=[10,25,50,100,0];var page={};function sizeOf(id){var v;try{v=parseInt(localStorage.getItem('ml-pgsize:'+id),10);}catch(e){v=NaN;}
+return SIZES.indexOf(v)>=0?v:25;}
+function setSize(id,v){try{localStorage.setItem('ml-pgsize:'+id,String(v));}catch(e){}}
+function barFor(tb,id){var el=document.getElementById(id+'-pager');if(el)return el;var host=tb.closest('.card')||tb.closest('table')||tb;el=document.createElement('div');el.id=id+'-pager';el.className='ml-pager';host.parentNode.insertBefore(el,host.nextSibling);return el;}
+return function paginate(id,items,opts){opts=opts||{};var tb=document.getElementById(id);if(!tb)return;var bar=barFor(tb,id);if(!items.length){tb.innerHTML=opts.empty||'';bar.style.display='none';return;}
+var size=sizeOf(id);var per=size||items.length;var pages=Math.max(1,Math.ceil(items.length/per));var p=Math.min(page[id]||1,pages);page[id]=p;var from=(p-1)*per;tb.innerHTML=items.slice(from,from+per).join('');if(opts.after)opts.after();if(items.length<=SIZES[0]){bar.style.display='none';return;}
+bar.style.display='flex';bar.innerHTML='<span>Show</span><select aria-label="Rows per page">'+
+SIZES.map(function(s){return'<option value="'+s+'"'+(s===size?' selected':'')+'>'+
+(s===0?'All':s)+'</option>';}).join('')+'</select><span>of '+items.length+'</span><span class="ml-pgap"></span>'+'<button data-d="-1"'+(p<=1?' disabled':'')+'>Previous</button>'+'<span class="ml-pnum"></span>'+'<button data-d="1"'+(p>=pages?' disabled':'')+'>Next</button>';bar.querySelector('.ml-pnum').textContent=(from+1)+'-'+Math.min(from+per,items.length);bar.querySelector('select').onchange=function(){setSize(id,parseInt(this.value,10));page[id]=1;paginate(id,items,opts);};bar.querySelectorAll('button').forEach(function(b){b.onclick=function(){page[id]=p+parseInt(b.dataset.d,10);paginate(id,items,opts);};});};})();</script>
+<script>(function(){var side=document.getElementById('mlside');document.querySelectorAll('.ms-nav a[data-path]').forEach(function(a){if(a.dataset.path===location.pathname)a.classList.add('active');});fetch('/api/status').then(function(r){return r.json();}).then(function(d){if(!d||!d.user)return;var label=d.name||d.user;document.getElementById('ms-name').textContent=label;var parts=String(label).replace(/[._-]+/g,' ').trim().split(/\s+/);var ini=parts.length>1?parts[0][0]+parts[parts.length-1][0]:parts[0].slice(0,2);document.getElementById('ms-av').textContent=ini;}).catch(function(){});var menu=document.getElementById('ms-menu');var acct=document.getElementById('ms-acct');function setOpen(open){menu.classList.toggle('open',open);acct.setAttribute('aria-expanded',open?'true':'false');}
 acct.addEventListener('click',function(e){if(e.target.closest('#ms-hide'))return;e.stopPropagation();setOpen(!menu.classList.contains('open'));});acct.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();setOpen(!menu.classList.contains('open'));}});document.addEventListener('click',function(e){if(!menu.contains(e.target))setOpen(false);});document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});var narrow=function(){return window.matchMedia('(max-width:820px)').matches;};function hide(){if(narrow())document.body.classList.remove('ms-open');else{document.body.classList.add('ms-collapsed');localStorage.setItem('ml-side','closed');}}
 function show(){if(narrow())document.body.classList.add('ms-open');else{document.body.classList.remove('ms-collapsed');localStorage.setItem('ml-side','open');}}
 document.getElementById('ms-hide').addEventListener('click',function(e){e.stopPropagation();hide();});document.getElementById('ms-show').addEventListener('click',function(e){e.stopPropagation();show();});document.getElementById('ms-scrim').addEventListener('click',hide);if(localStorage.getItem('ml-side')==='closed')document.body.classList.add('ms-collapsed');if(typeof window.toggleTheme!=='function'){window.toggleTheme=function(){var cur=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';var next=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',next);localStorage.setItem('sec-theme',next);var l=document.getElementById('ms-theme-lbl');if(l)l.textContent=next==='dark'?'Light mode':'Dark mode';};}
@@ -441,10 +469,6 @@ var d=await r.json().catch(function(){return{};});if(!r.ok)throw new Error(d.err
 .mlchat-m.bot{align-self:flex-start;background:var(--bg,#111);color:var(--text,#eee);
   border:1px solid var(--border2,#333);border-bottom-left-radius:3px;
   border-left:3px solid var(--accent,#4f7cff)}
-
-.mlchat-m .ml-pos{color:var(--green,#3ecf72);font-weight:600}
-.mlchat-m .ml-neg{color:var(--red,#f5504a);font-weight:600}
-.mlchat-m .ml-warn{color:var(--amber,#e0a940);font-weight:600}
 .mlchat-m.bot strong{font-weight:700}
 .mlchat-m.err{align-self:flex-start;background:transparent;border:0;
   color:var(--red,#e06c75);font-size:12px}
@@ -522,16 +546,15 @@ document.addEventListener('DOMContentLoaded',init);else init();return{open:open,
   </table></div>
 </main>
 
-<script>const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');let DATA=null;const openDetails=new Set();const CAT_NAMES={counts:'Counts',company:'Company lookups',prices:'Prices',industry:'FF48 industries',world:'World events',cross:'Cross-domain joins',stats:'Correlation stats',traps:'Schema traps',refusal:'Guardrail refusals',honesty:'Empty-result honesty',agg:'Aggregations'};async function load(){let d;try{d=await fetch('/api/benchmark').then(r=>r.json());}
+<script>const $=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');let DATA=null;let PROD_MODEL='';const openDetails=new Set();const CAT_NAMES={counts:'Counts',company:'Company lookups',prices:'Prices',industry:'FF48 industries',world:'World events',cross:'Cross-domain joins',stats:'Correlation stats',traps:'Schema traps',refusal:'Guardrail refusals',honesty:'Empty-result honesty',agg:'Aggregations'};async function load(){let d;try{d=await fetch('/api/benchmark').then(r=>r.json());}
 catch(e){$('#banner-txt').textContent='Failed to load benchmark results: '+e;return;}
 if(d.error){$('#banner-txt').textContent=d.error;return;}
-DATA=d;renderBanner();renderBoard();renderCatalog();if(d.running)setTimeout(load,30000);}
+DATA=d;PROD_MODEL=d.prod_model||'';renderBanner();renderBoard();renderCatalog();if(d.running)setTimeout(load,30000);}
 function renderBanner(){const b=$('#banner'),n=DATA.models.length;b.classList.toggle('live',DATA.running);const total=DATA.cases.length;$('#banner-txt').innerHTML=DATA.running?`<b>Benchmark run in progress</b>&nbsp;— ${n} model${n===1?'':'s'} on the board so far, `+`${total} test cases each. Auto-refreshing every 30 s.`:`Benchmark complete — ${n} models × ${total} execution-graded test cases.`;}
 function rateChip(cat,s){const pct=s.total?s.pass/s.total:0;const cls=pct>=0.8?'good':pct>=0.5?'mid':'bad';return`<span class="cat-chip ${cls}" title="${esc(CAT_NAMES[cat] || cat)}">${esc(cat)} ${s.pass}/${s.total}</span>`;}
-function renderBoard(){const tb=$('#board-body');if(!DATA.models.length){tb.innerHTML='<tr><td colspan="11" class="empty">No results yet — the run may still be warming up.</td></tr>';return;}
-tb.innerHTML=DATA.models.map((m,i)=>{const open=openDetails.has(m.model);const cats=Object.entries(m.per_category).map(([c,s])=>rateChip(c,s)).join('');return`<tr>
+function renderBoard(){mlPaginate('board-body',DATA.models.map((m,i)=>{const open=openDetails.has(m.model);const cats=Object.entries(m.per_category).map(([c,s])=>rateChip(c,s)).join('');return`<tr>
       <td class="rank">${i+1}</td>
-      <td class="model-name mono">${esc(m.model)}${m.model === 'qwen3.6:35b' ? '<span class="prod">prod default</span>' : ''}</td>
+      <td class="model-name mono">${esc(m.model)}${m.model === PROD_MODEL ? '<span class="prod">prod default</span>' : ''}</td>
       <td><div class="ratebar"><div class="fill" style="width:${m.pass_rate}%"></div><div class="lbl">${m.pass_rate}%</div></div></td>
       <td class="num" style="color:var(--green)">${m.pass}</td>
       <td class="num" style="color:var(--red)">${m.fail}</td>
@@ -544,7 +567,7 @@ tb.innerHTML=DATA.models.map((m,i)=>{const open=openDetails.has(m.model);const c
     </tr>
     <tr class="details-row" id="det-${cssId(m.model)}" style="display:${open?'':'none'}">
       <td colspan="11"><div class="details-inner" id="det-inner-${cssId(m.model)}"></div></td>
-    </tr>`;}).join('');openDetails.forEach(m=>renderDetails(m));}
+    </tr>`;}),{empty:'<tr><td colspan="11" class="empty">No results yet — the run may still be warming up.</td></tr>',after:()=>openDetails.forEach(m=>renderDetails(m)),});}
 const cssId=s=>s.replace(/[^a-zA-Z0-9]/g,'_');function toggleDetails(model,btn){const row=document.getElementById('det-'+cssId(model));const show=row.style.display==='none';row.style.display=show?'':'none';btn.classList.toggle('open',show);btn.textContent=show?'Hide':'Details';if(show){openDetails.add(model);renderDetails(model);}else openDetails.delete(model);}
 const drawerState={};function renderDetails(model){const m=DATA.models.find(x=>x.model===model);const host=document.getElementById('det-inner-'+cssId(model));if(!m||!host)return;const st=drawerState[model]||={filter:'all',search:''};const counts={all:m.records.length,pass:m.pass,fail:m.fail,timeout:m.timeout,error:m.error};const recs=m.records.filter(r=>(st.filter==='all'||r.status===st.filter)&&(!st.search||(r.id+' '+r.category+' '+r.question+' '+(r.answer||'')).toLowerCase().includes(st.search)));host.innerHTML=`
     <div class="filters">
@@ -555,15 +578,26 @@ const drawerState={};function renderDetails(model){const m=DATA.models.find(x=>x
     </div>
     <div class="card"><table class="case-tbl">
       <thead><tr><th>Case</th><th>Category</th><th>Status</th><th>Question → answer</th><th>Fail reason</th><th>Latency</th><th>Tools</th></tr></thead>
-      <tbody>${recs.map(r => `<tr><td class="mono">${esc(r.id)}</td><td class="mono">${esc(r.category)}</td><td><span class="pill ${esc(r.status)}">${esc(r.status)}</span></td><td class="q-cell"onclick="this.classList.toggle('open')"><div class="q-text">${esc(r.question)}</div><div class="ans"><b>Answer:</b>${r.answer?esc(r.answer):'<i>(none)</i>'}</div></td><td class="why">${esc(r.why||'')}</td><td class="num">${r.latency_s}s</td><td class="num">${r.n_tool_calls??''}</td></tr>`).join('') || '<tr><td colspan="7" class="empty">No cases match.</td></tr>'}</tbody>
-    </table></div>`;}
+      <tbody id="cases-${cssId(model)}">${''}</tbody>
+    </table></div>`;const rows=recs.map(r=>`<tr>
+        <td class="mono">${esc(r.id)}</td>
+        <td class="mono">${esc(r.category)}</td>
+        <td><span class="pill ${esc(r.status)}">${esc(r.status)}</span></td>
+        <td class="q-cell" onclick="this.classList.toggle('open')">
+          <div class="q-text">${esc(r.question)}</div>
+          <div class="ans"><b>Answer:</b> ${r.answer ? esc(r.answer) : '<i>(none)</i>'}</div>
+        </td>
+        <td class="why">${esc(r.why || '')}</td>
+        <td class="num">${r.latency_s}s</td>
+        <td class="num">${r.n_tool_calls ?? ''}</td>
+      </tr>`);mlPaginate('cases-'+cssId(model),rows,{empty:'<tr><td colspan="7" class="empty">No cases match.</td></tr>'});}
 function setFilter(model,f){drawerState[model].filter=f;renderDetails(model);}
 function setSearch(model,s){drawerState[model].search=s.toLowerCase();clearTimeout(drawerState[model]._t);drawerState[model]._t=setTimeout(()=>{const inp=document.activeElement;renderDetails(model);const ni=document.querySelector('#det-inner-'+cssId(model)+' .fsearch');if(ni&&inp&&inp.className==='fsearch'){ni.focus();ni.setSelectionRange(ni.value.length,ni.value.length);}},250);}
 function renderCatalog(){const byModel={};DATA.models.forEach(m=>{byModel[m.model]={};m.records.forEach(r=>byModel[m.model][r.id]=r);});const models=DATA.models.map(m=>m.model);$('#matrix-legend').innerHTML=models.map((m,i)=>`<span><b>${i+1}.</b> <span class="mono">${esc(m)}</span></span>`).join('')+`<span style="margin-left:auto"><span class="matrix-dot md-pass"></span> pass
      <span class="matrix-dot md-fail"></span> fail
      <span class="matrix-dot md-timeout"></span> timeout
      <span class="matrix-dot md-error"></span> error
-     <span class="matrix-dot md-none"></span> not run</span>`;$('#verdict-head').textContent='Verdicts ('+models.map((_,i)=>i+1).join(' · ')+')';const groups={};DATA.cases.forEach(c=>(groups[c.category]||=[]).push(c));let html='';for(const[cat,cases]of Object.entries(groups)){html+=`<tr class="cat-head"><td colspan="3">${esc(CAT_NAMES[cat] || cat)} · ${cases.length} cases</td></tr>`;html+=cases.map(c=>{const dots=models.map(m=>{const r=byModel[m][c.id];const cls=r?'md-'+r.status:'md-none';const tip=m+': '+(r?r.status:'not run');return`<span class="matrix-dot ${cls}" title="${esc(tip)}"></span>`;}).join('');const answers=models.map((m,i)=>{const r=byModel[m][c.id];if(!r)return'';return`<b>${i+1}. ${esc(m)} — ${r.status}${r.status !== 'pass' && r.why ? ' (' + esc(r.why) + ')' : ''}:</b>\n${esc(r.answer || '(no answer)')}`;}).filter(Boolean).join('\n\n');return`<tr>
+     <span class="matrix-dot md-none"></span> not run</span>`;$('#verdict-head').textContent='Verdicts ('+models.map((_,i)=>i+1).join(' · ')+')';const groups={};DATA.cases.forEach(c=>(groups[c.category]||=[]).push(c));const items=[];for(const[cat,cases]of Object.entries(groups)){const head=`<tr class="cat-head"><td colspan="3">${esc(CAT_NAMES[cat] || cat)} · ${cases.length} cases</td></tr>`;items.push(...cases.map((c,ci)=>{const dots=models.map(m=>{const r=byModel[m][c.id];const cls=r?'md-'+r.status:'md-none';const tip=m+': '+(r?r.status:'not run');return`<span class="matrix-dot ${cls}" title="${esc(tip)}"></span>`;}).join('');const answers=models.map((m,i)=>{const r=byModel[m][c.id];if(!r)return'';return`<b>${i+1}. ${esc(m)} — ${r.status}${r.status !== 'pass' && r.why ? ' (' + esc(r.why) + ')' : ''}:</b>\n${esc(r.answer || '(no answer)')}`;}).filter(Boolean).join('\n\n');const row=`<tr>
         <td class="mono">${esc(c.id)}</td>
         <td class="q-cell" onclick="this.classList.toggle('open')">
           <div class="q-text">${esc(c.question)}</div>
@@ -571,8 +605,8 @@ function renderCatalog(){const byModel={};DATA.models.forEach(m=>{byModel[m.mode
           <div class="ans">${answers || '<i>No model has run this case yet.</i>'}</div>
         </td>
         <td style="white-space:nowrap">${dots}</td>
-      </tr>`;}).join('');}
-$('#catalog-body').innerHTML=html||'<tr><td colspan="3" class="empty">No cases found.</td></tr>';}
+      </tr>`;return(ci===0?head:'')+row;}));}
+mlPaginate('catalog-body',items,{empty:'<tr><td colspan="3" class="empty">No cases found.</td></tr>'});}
 load();</script>
 <script>function setThemeGlyph(){const t=document.documentElement.getAttribute('data-theme');const b=document.getElementById('theme-btn');if(b)b.textContent=(t==='dark')?'☀️':'🌙';}
 function toggleTheme(){const next=(document.documentElement.getAttribute('data-theme')==='dark')?'light':'dark';document.documentElement.setAttribute('data-theme',next);localStorage.setItem('sec-theme',next);setThemeGlyph();}

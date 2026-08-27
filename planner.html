@@ -135,7 +135,17 @@ tr.cash td{color:var(--text3);font-style:italic}
 #msg{color:var(--text3);font-size:13px;padding:26px 0;text-align:center}
 #msg.bad{color:var(--red)}
 .hidden{display:none!important}
-</style>
+.ml-pager{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin:10px 0 4px;font-size:12.5px;color:var(--text3)}
+.ml-pager select{background:var(--bg2);color:var(--text2);border:1px solid var(--border2);
+  border-radius:7px;padding:4px 8px;font-size:12.5px;font-family:inherit;cursor:pointer}
+.ml-pager select:focus{outline:none;border-color:var(--accent)}
+.ml-pager .ml-pgap{flex:1}
+.ml-pager button{background:var(--bg2);border:1px solid var(--border2);color:var(--text2);
+  border-radius:7px;padding:4px 10px;font-size:12.5px;cursor:pointer;font-family:inherit}
+.ml-pager button:hover:not(:disabled){border-color:var(--accent);color:var(--text)}
+.ml-pager button:disabled{opacity:.4;cursor:default}
+.ml-pager .ml-pnum{min-width:74px;text-align:center}</style>
 <script src="/config.js"></script>
 
 <style>html{visibility:hidden}</style>
@@ -376,7 +386,15 @@ body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
   </div>
 </aside>
 
-<script>(function(){var side=document.getElementById('mlside');document.querySelectorAll('.ms-nav a[data-path]').forEach(function(a){if(a.dataset.path===location.pathname)a.classList.add('active');});fetch('/api/status').then(function(r){return r.json();}).then(function(d){if(!d||!d.user)return;document.getElementById('ms-name').textContent=d.user;var parts=String(d.user).replace(/[._-]+/g,' ').trim().split(/\s+/);var ini=parts.length>1?parts[0][0]+parts[parts.length-1][0]:parts[0].slice(0,2);document.getElementById('ms-av').textContent=ini;}).catch(function(){});var menu=document.getElementById('ms-menu');var acct=document.getElementById('ms-acct');function setOpen(open){menu.classList.toggle('open',open);acct.setAttribute('aria-expanded',open?'true':'false');}
+<script>window.mlPaginate=(function(){var SIZES=[10,25,50,100,0];var page={};function sizeOf(id){var v;try{v=parseInt(localStorage.getItem('ml-pgsize:'+id),10);}catch(e){v=NaN;}
+return SIZES.indexOf(v)>=0?v:25;}
+function setSize(id,v){try{localStorage.setItem('ml-pgsize:'+id,String(v));}catch(e){}}
+function barFor(tb,id){var el=document.getElementById(id+'-pager');if(el)return el;var host=tb.closest('.card')||tb.closest('table')||tb;el=document.createElement('div');el.id=id+'-pager';el.className='ml-pager';host.parentNode.insertBefore(el,host.nextSibling);return el;}
+return function paginate(id,items,opts){opts=opts||{};var tb=document.getElementById(id);if(!tb)return;var bar=barFor(tb,id);if(!items.length){tb.innerHTML=opts.empty||'';bar.style.display='none';return;}
+var size=sizeOf(id);var per=size||items.length;var pages=Math.max(1,Math.ceil(items.length/per));var p=Math.min(page[id]||1,pages);page[id]=p;var from=(p-1)*per;tb.innerHTML=items.slice(from,from+per).join('');if(opts.after)opts.after();if(items.length<=SIZES[0]){bar.style.display='none';return;}
+bar.style.display='flex';bar.innerHTML='<span>Show</span><select aria-label="Rows per page">'+
+SIZES.map(function(s){return'<option value="'+s+'"'+(s===size?' selected':'')+'>'+
+(s===0?'All':s)+'</option>';}).join('')+'</select><span>of '+items.length+'</span><span class="ml-pgap"></span>'+'<button data-d="-1"'+(p<=1?' disabled':'')+'>Previous</button>'+'<span class="ml-pnum"></span>'+'<button data-d="1"'+(p>=pages?' disabled':'')+'>Next</button>';bar.querySelector('.ml-pnum').textContent=(from+1)+'-'+Math.min(from+per,items.length);bar.querySelector('select').onchange=function(){setSize(id,parseInt(this.value,10));page[id]=1;paginate(id,items,opts);};bar.querySelectorAll('button').forEach(function(b){b.onclick=function(){page[id]=p+parseInt(b.dataset.d,10);paginate(id,items,opts);};});};})();</script><script>(function(){var side=document.getElementById('mlside');document.querySelectorAll('.ms-nav a[data-path]').forEach(function(a){if(a.dataset.path===location.pathname)a.classList.add('active');});fetch('/api/status').then(function(r){return r.json();}).then(function(d){if(!d||!d.user)return;document.getElementById('ms-name').textContent=d.user;var parts=String(d.user).replace(/[._-]+/g,' ').trim().split(/\s+/);var ini=parts.length>1?parts[0][0]+parts[parts.length-1][0]:parts[0].slice(0,2);document.getElementById('ms-av').textContent=ini;}).catch(function(){});var menu=document.getElementById('ms-menu');var acct=document.getElementById('ms-acct');function setOpen(open){menu.classList.toggle('open',open);acct.setAttribute('aria-expanded',open?'true':'false');}
 acct.addEventListener('click',function(e){if(e.target.closest('#ms-hide'))return;e.stopPropagation();setOpen(!menu.classList.contains('open'));});acct.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();setOpen(!menu.classList.contains('open'));}});document.addEventListener('click',function(e){if(!menu.contains(e.target))setOpen(false);});document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false);});var narrow=function(){return window.matchMedia('(max-width:820px)').matches;};function hide(){if(narrow())document.body.classList.remove('ms-open');else{document.body.classList.add('ms-collapsed');localStorage.setItem('ml-side','closed');}}
 function show(){if(narrow())document.body.classList.add('ms-open');else{document.body.classList.remove('ms-collapsed');localStorage.setItem('ml-side','open');}}
 document.getElementById('ms-hide').addEventListener('click',function(e){e.stopPropagation();hide();});document.getElementById('ms-show').addEventListener('click',function(e){e.stopPropagation();show();});document.getElementById('ms-scrim').addEventListener('click',hide);if(localStorage.getItem('ml-side')==='closed')document.body.classList.add('ms-collapsed');if(typeof window.toggleTheme!=='function'){window.toggleTheme=function(){var cur=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';var next=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',next);localStorage.setItem('sec-theme',next);var l=document.getElementById('ms-theme-lbl');if(l)l.textContent=next==='dark'?'Light mode':'Dark mode';};}
