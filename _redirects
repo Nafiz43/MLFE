@@ -1,11 +1,12 @@
 /login  /login.html  200
-/accuracy  /accuracy.html  200
-/benchmark  /benchmark.html  200
-/events  /events.html  200
-/feedback  /feedback.html  200
 /forecast  /forecast.html  200
 /planner  /planner.html  200
+/events  /events.html  200
 /trades  /trades.html  200
+/benchmark  /benchmark.html  200
+/accuracy  /accuracy.html  200
+/feedback  /feedback.html  200
 /settings  /settings.html  200
 /accounts  /accounts.html  200
+/box  /box.html  200
 /*  /login.html  200

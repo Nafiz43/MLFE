@@ -99,7 +99,7 @@ td.name{font-family:var(--sans);white-space:nowrap;overflow:hidden;text-overflow
 <script src="/config.js"></script>
 
 <style>html{visibility:hidden}</style>
-<script>(function(){var DEV_ONLY=['nav-bench','nav-feedback','nav-accounts'];var DATA_ONLY=['nav-new','nav-chat','nav-forecast','nav-planner','nav-events','nav-trades'];var ADMIN_OK=/^\/(accounts|benchmark|feedback|accuracy|settings)/;fetch('/api/status').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){if(d&&d.must_change&&location.pathname.indexOf('/settings')!==0){location.replace('/settings');return;}var dev=d&&d.mode==='developer';if(dev&&!ADMIN_OK.test(location.pathname)){location.replace('/accounts');return;}(dev?DATA_ONLY:DEV_ONLY).forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});document.documentElement.style.visibility='visible';}).catch(function(){location.replace('/login.html');});})();</script>
+<script>(function(){var DEV_ONLY=['nav-bench','nav-feedback','nav-accounts','nav-box'];var DATA_ONLY=['nav-new','nav-chat','nav-forecast','nav-planner','nav-events','nav-trades'];var ADMIN_OK=/^\/(accounts|box|benchmark|feedback|accuracy|settings)/;fetch('/api/status').then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(d){if(d&&d.must_change&&location.pathname.indexOf('/settings')!==0){location.replace('/settings');return;}var dev=d&&d.mode==='developer';if(dev&&!ADMIN_OK.test(location.pathname)){location.replace('/accounts');return;}(dev?DATA_ONLY:DEV_ONLY).forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});document.documentElement.style.visibility='visible';}).catch(function(){location.replace('/login.html');});})();</script>
 
 <style>
 
@@ -292,7 +292,7 @@ body.ms-collapsed #topbar,body.ms-collapsed #hdr{padding-left:52px}
        title="Create, reset and remove user accounts">
       <svg width="16" height="16" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
       <span class="lbl">Accounts</span></a>
-    <a class="ms-item" id="nav-accuracy" href="/accuracy" data-path="/accuracy"
+    <a class="ms-item" id="nav-box" href="/box" data-path="/box" title="Unix logins on the machine MarketLattice runs on"><svg width="16" height="16" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4M7 8h.01M11 8h6"/></svg><span class="lbl">Box Users</span></a><a class="ms-item" id="nav-accuracy" href="/accuracy" data-path="/accuracy"
        title="Measured end-to-end accuracy of the planner pipeline">
       <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>
       <span class="lbl">Accuracy</span></a>
